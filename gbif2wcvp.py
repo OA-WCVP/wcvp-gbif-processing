@@ -28,7 +28,6 @@ def main():
     # 7ddf754f-d193-4cc9-b351-99906754a03b) include names of the form "Genus species publnote" 
     # where publnote is one of: cited, made, oppr, publ, ref, validly)
     # These can be retrieved as follows: df[(df_gbif.name != df_gbif.canonicalName)]
-
     ###########################################################################
     # 2. Read WCVP input file and process
     ###########################################################################
@@ -58,7 +57,7 @@ def main():
                                 , match_cols=['family','genus','taxon_name'])    
     num_ids_matched_stage_1 = df_match[df_match.match_id.notnull()].original_id.nunique()
     print('Number of IDs matched at stage 1: ', num_ids_matched_stage_1)
-    gbif_match_1 = pd.merge(left=df_match[df_match.match_id.notnull()]
+    df_gbif_match_1 = pd.merge(left=df_match[df_match.match_id.notnull()]
                             , right=df_gbif[['taxonID','scientificName']].rename(columns={'scientificName':'original_name'})
                             , left_on='original_id'
                             , right_on='taxonID'
@@ -73,7 +72,7 @@ def main():
                                 , match_cols=['taxon_name'])    
     num_ids_matched_stage_2 = df_match[df_match.match_id.notnull()].original_id.nunique()
     print('Number of IDs matched at stage 2: ', num_ids_matched_stage_2)
-    gbif_match_2 = pd.merge(left=df_match[df_match.match_id.notnull()]
+    df_gbif_match_2 = pd.merge(left=df_match[df_match.match_id.notnull()]
                             , right=df_gbif[['taxonID','name']].rename(columns={'name':'original_name'})
                             , left_on='original_id'
                             , right_on='taxonID'
@@ -86,7 +85,9 @@ def main():
     ###########################################################################
     # 4. Resolve names
     ###########################################################################
-    # TODO
+    df_gbif_match_1 = resolveAccepted(df_gbif_match_1)
+    for match_status in df_gbif_match_1.match_status.unique():
+        print(df_gbif_match_1[df_gbif_match_1.match_status==match_status][['match_status','accepted_id','accepted_name','accepted_authors','accepted_rank']].sample(n=1))
 
     ###########################################################################
     # 5. Output file
@@ -135,8 +136,21 @@ def printMatchStatistics(df):
     unmatched_name_count = df[df['match_id'].isnull()]['original_id'].nunique()
     print('Unmatched names: {}'.format(unmatched_name_count))
 
-def resolveAccepted():
-    pass
+def resolveAccepted(df):
+    print(df.columns)
+    prefix_to_status_mapper={'match':['Accepted'],'accepted':['Homotypic Synonym','Orthographic']}
+    
+    for prefix, statuses in prefix_to_status_mapper.items():
+        mask = (df.match_status.isin(statuses))
+        for column in ['id','authors','rank','name',]:
+            source_column = '{}_{}'.format(prefix,column)
+            dest_column = 'accepted_' + column
+            print('{}: {}->{}'.format(','.join(statuses), source_column, dest_column))
+            df.loc[mask,dest_column]= df[mask][source_column]
+    for column in ['id','authors','rank','name',]:
+        dest_column = 'accepted_' + column
+        df.loc[~df.match_status.isin(['Accepted','Homotypic Synonym','Orthographic']),dest_column]= None
+    return df
 
 def resolveMulti():
     pass
