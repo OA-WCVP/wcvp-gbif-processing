@@ -108,9 +108,9 @@ def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['ta
                         ,how='left')
     df_join.rename(columns=column_mapper_source,inplace=True)
     column_mapper_wcvp = {'plant_name_id':'plant_name_id',
-                    'accepted_name':'taxon_name',
-                    'accepted_authors':'taxon_authors',
-                    'accepted_rank':'taxon_rank'}
+                    'taxon_name':'accepted_name',
+                    'taxon_authors':'accepted_authors',
+                    'taxon_rank':'accepted_rank'}
     df_join = pd.merge(left=df_join[list(column_mapper_source.values())] 
                     ,right=df_wcvp.rename(columns=column_mapper_wcvp)[[col for col in column_mapper_wcvp.values()]]
                     ,left_on='accepted_id'
