@@ -33,13 +33,21 @@ A complete run can be initiated with `make all` or individual steps are detailed
 
 1. Downloads
     - GBIF taxonomy - `make downloads/gbif-taxonomy.zip` or shorthand: `make getgbif`
-    - WCVP taxonomy - `make downloads/wcvp-taxonomy.zip` or shorthand: `make getwcvp`
+    - WCVP taxonomy - `make downloads/wcvp.txt` or shorthand: `make getwcvp`
+1. Extract Taxon.tsv file from GBIF backbon taxonomy:
+    - `make data/Taxon.tsv`
+1. Filter GBIF taxonomy
+    - **Script** `filtergbif.py`
+    - **Inputfile(s):** `data/Taxon.tsv`
+    - **Outputfile:** `data/Taxon-Tracheophyta.tsv`
+    - **Method** TBC
+    - **How to run:** Use the Makefile target: `make data/Taxon-Tracheophyta.tsv` or the shorthand: `make filter`
 1. Integrate GBIF taxonomy with WCVP
     - **Script** `gbif2wcvp.py`
-    - **Inputfile(s):** `downloads/gbif-taxonomy.zip`, `downloads/wcvp-taxonomy.zip`
+    - **Inputfile(s):** `make data/Taxon-Tracheophyta.tsv`, `downloads/wcvp.txt`
     - **Outputfile:** `data/gbif2wcvp.csv`
     - **Method** TBC
-    - **How to run:** Use the Makefile target: `make data/gbif2wcvp.csv` or the shorthand: `make gbif2wcvp`
+    - **How to run:** Use the Makefile target: `make data/gbif2wcvp.csv` or the shorthand: `make all`
 1. Report on GBIF holdings using the WCVP taxonomy - TODO
 
 ### Cleaning up downloaded and processed files
