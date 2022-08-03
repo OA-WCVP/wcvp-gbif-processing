@@ -123,51 +123,6 @@ def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['ta
     # Return complete join datastructure
     return df_join
 
-def matchNamesExactly_(df, df_wcvp, id_col='id', name_col='name',match_rank=None,with_author=True):
-    if match_rank is not None:
-        drop_mask = (df_wcvp.taxon_rank != match_rank)
-        df_wcvp.drop(df_wcvp[drop_mask].index,inplace=True)
-        print('Retained {} WCVP rows'.format(len(df_wcvp)))
-    column_renames={id_col:'original_id',
-                    name_col:'match_name',
-                    'plant_name_id':'match_id',
-                    'taxon_rank':'match_rank',
-                    'taxon_authors':'match_authors',
-                    'taxon_status':'match_status',
-                    'accepted_plant_name_id':'accepted_id'}
-    output_cols = column_renames.keys()
-    # equiv to "setNames" part of R
-    print('Setting taxon_name from ', name_col)
-    df['taxon_name']=df[name_col]
-    # Use all column names in common for left_join:
-    join_cols = [col for col in df_wcvp.columns if col in df.columns]
-    print('LEFT joining on: {}'.format(','.join(join_cols)))
-    #print(df[join_cols].sample(n=10))
-    #print(df_wcvp[join_cols].sample(n=10))
-    df_join = pd.merge(left=df,right=df_wcvp,left_on=join_cols,right_on=join_cols,how='left')
-    df_join.rename(columns=column_renames,inplace=True)
-    #print(df_join[df_join.match_id.notnull()].sample(n=1).T)
-    print(list(column_renames.values()))
-    #print(df_join.columns)
-    print(df_join[list(column_renames.values())])
-    wcvp_renames = {'plant_name_id':'plant_name_id',
-                    'accepted_name':'taxon_name',
-                    'accepted_authors':'taxon_authors',
-                    'accepted_rank':'taxon_rank'}
-    df_wcvp.rename(columns=wcvp_renames,inplace=True)
-    df_join = pd.merge(left=df_join[list(column_renames.values())]
-                    ,right=df_wcvp[[col for col in df_wcvp.columns if col in wcvp_renames.values()]]
-                    ,left_on='accepted_id'
-                    ,right_on='plant_name_id'
-                    ,how='left')
-    #print(df_join[df_join.match_id.notnull()].sample(n=1).T)
-
-
-    # Print match statistics
-    printMatchStatistics(df_join)
-
-    return df_join[df_join.match_id.notnull()]
-
 def printMatchStatistics(df):
     # Multiple matches
     dfg = df.groupby('original_id').size()
