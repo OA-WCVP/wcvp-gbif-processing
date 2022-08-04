@@ -2,6 +2,7 @@ import pandas as pd
 pd.set_option('display.max_rows',100)
 import argparse
 from unidecode import unidecode
+import re
 
 def main():
     parser = argparse.ArgumentParser()
@@ -28,6 +29,7 @@ def main():
     # 7ddf754f-d193-4cc9-b351-99906754a03b) include names of the form "Genus species publnote" 
     # where publnote is one of: cited, made, oppr, publ, ref, validly)
     # These can be retrieved as follows: df[(df_gbif.name != df_gbif.canonicalName)]
+
     ###########################################################################
     # 2. Read WCVP input file and process
     ###########################################################################
@@ -83,16 +85,20 @@ def main():
     print('Number unmatched:', num_unmatched)
 
     ###########################################################################
-    # 4. Resolve names
+    # 4. Resolve names - getting data about the accepted name and processing 
+    # those which match to multiple names to arrive at a single decision
     ###########################################################################
     df_gbif_match_1 = resolveAccepted(df_gbif_match_1)
-    for match_status in df_gbif_match_1.match_status.unique():
-        print(df_gbif_match_1[df_gbif_match_1.match_status==match_status][['match_status','accepted_id','accepted_name','accepted_authors','accepted_rank']].sample(n=1))
+    df_gbif_match_1 = resolveMultipleMatches(df_gbif_match_1)
+
+    df_gbif_match_2 = resolveAccepted(df_gbif_match_2)
+    df_gbif_match_2 = resolveMultipleMatches(df_gbif_match_2)
 
     ###########################################################################
     # 5. Output file
     ###########################################################################
-    # TODO
+    # TODO include unmatched names in output
+    pd.concat([df_gbif_match_1,df_gbif_match_2]).to_csv(args.outputfile,sep='\t',index=False)
 
 def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['taxon_name']):
     column_mapper_source={id_col:'original_id',
@@ -118,7 +124,6 @@ def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['ta
                     ,right_on='plant_name_id'
                     ,how='left')
 
-    # Print match statistics
     printMatchStatistics(df_join)
 
     # Return complete join datastructure
@@ -136,25 +141,82 @@ def printMatchStatistics(df):
     unmatched_name_count = df[df['match_id'].isnull()]['original_id'].nunique()
     print('Unmatched names: {}'.format(unmatched_name_count))
 
-def resolveAccepted(df):
-    print(df.columns)
+def extractRank(s):
+    rank = None
+    m = re.search(r'(?<= )(var\.|ssp\.|subsp\.|f.)(?= )',s)
+    if m:
+        rank = m.groups()[0]
+        if rank == 'ssp.':
+            rank = 'subsp.'
+    return rank
+
+def resolveMultiGroup(dfg):
+    matched_row = None
+    original_name = dfg['original_name'].unique()[0]
+    if len(dfg) == 1:
+        matched_row = dfg
+    # If the name to match is an infraspecific, take the match with the right rank
+    rank = extractRank(original_name)
+    if matched_row is None and rank is not None:
+        padded_rank = ' {} '.format(rank)
+        mask = (dfg.original_name.str.contains(padded_rank))
+        if len(dfg[mask]) == 1:
+            matched_row = dfg[mask]
+    # If there is an accepted name present, take that
+    if matched_row is None:
+        mask = (dfg.match_status == 'Accepted')
+        if len(dfg[mask]) == 1:
+            matched_row = dfg[mask]
+    # If there is an orthographic variant present, take that
+    if matched_row is None:
+        mask = (dfg.match_status == 'Orthographic')
+        if len(dfg[mask]) == 1:
+            matched_row = dfg[mask]
+    # If there is a homotypic synonym present, take that
+    if matched_row is None:
+        mask = (dfg.match_status == 'Homotypic Synonym')
+        if len(dfg[mask]) == 1:
+            matched_row = dfg[mask]
+    return matched_row
+
+def resolveMultipleMatches(df):
+    dfg = df.groupby('original_name')['match_id'].nunique().to_frame('match_count')
+
+    df_single = pd.merge(left=df,
+                        right=dfg[dfg.match_count==1],
+                        left_on='original_name',
+                        right_index=True,
+                        how='inner').drop(columns='match_count')
+
+    df_multi = pd.merge(left=df,
+                        right=dfg[dfg.match_count>1],
+                        left_on='original_name',
+                        right_index=True,
+                        how='inner').drop(columns='match_count')
+
+    # Group df_multi and resolve at group level
+    df_multi = df_multi.groupby('original_name').apply(lambda x: resolveMultiGroup(x))
+    df_multi.reset_index(drop=True, inplace=True)
+
+    return pd.concat([df_single, df_multi])
+
+def resolveAccepted(df, blank_columns=False):
+    # print(df)
     prefix_to_status_mapper={'match':['Accepted'],'accepted':['Homotypic Synonym','Orthographic']}
-    
+    dest_prefix = 'accepted_'
     for prefix, statuses in prefix_to_status_mapper.items():
         mask = (df.match_status.isin(statuses))
         for column in ['id','authors','rank','name',]:
             source_column = '{}_{}'.format(prefix,column)
-            dest_column = 'accepted_' + column
-            print('{}: {}->{}'.format(','.join(statuses), source_column, dest_column))
+            dest_column = dest_prefix + column
+            #print('{}: {}->{}'.format(','.join(statuses), source_column, dest_column))
             df.loc[mask,dest_column]= df[mask][source_column]
-    for column in ['id','authors','rank','name',]:
-        dest_column = 'accepted_' + column
-        df.loc[~df.match_status.isin(['Accepted','Homotypic Synonym','Orthographic']),dest_column]= None
+    if blank_columns:
+        for column in ['id','authors','rank','name',]:
+            dest_column = dest_prefix + column
+            df.loc[~df.match_status.isin(['Accepted','Homotypic Synonym','Orthographic']),dest_column]= None
+    # print(df)
     return df
-
-def resolveMulti():
-    pass
-
 
 if __name__ == '__main__':
     main()
