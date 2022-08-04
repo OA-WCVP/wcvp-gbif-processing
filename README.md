@@ -3,7 +3,9 @@ Match GBIF and WCVP taxonomies, such that an assessment of GBIF holdings can be 
 
 ## Background
 
-The GBIF taxonomy is available as a download
+The GBIF taxonomy is available as a download, and the WCVP taxonomy has been made available to authors invited for the special issue.
+
+This integration process has been adapted from one coded in R by [Barnaby Walker](https://www.github.com/barnabywalker). This is available in [DarkSpots/wcvp-gbif-processing](https://github.com/DarkSpots/wcvp-gbif-processing) and for convenience / comparison the R scripts have been copied to the `resources` directory in this repository.
 
 ## Research questions
 
@@ -14,7 +16,7 @@ TBC
 ### Pre-requisites
 
 The software is written in `Python` and execution is managed with the build tool `make`.
-APIs are used ... TODO
+
 Software package dependencies are specified in `requirements.txt`
 
 ### How to set up the environment
@@ -34,7 +36,7 @@ A complete run can be initiated with `make all` or individual steps are detailed
 1. Downloads
     - GBIF taxonomy - `make downloads/gbif-taxonomy.zip` or shorthand: `make getgbif`
     - WCVP taxonomy - `make downloads/wcvp.txt` or shorthand: `make getwcvp`
-1. Extract Taxon.tsv file from GBIF backbon taxonomy:
+1. Extract Taxon.tsv file from GBIF backbone taxonomy:
     - `make data/Taxon.tsv`
 1. Filter GBIF taxonomy
     - **Script** `filtergbif.py`
