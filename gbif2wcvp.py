@@ -94,11 +94,21 @@ def main():
     df_gbif_match_2 = resolveAccepted(df_gbif_match_2)
     df_gbif_match_2 = resolveMultipleMatches(df_gbif_match_2)
 
+    df_gbif_matches = pd.concat([df_gbif_match_1,df_gbif_match_2])
+    print('Concatenated GBIF matches, total rows: :', len(df_gbif_matches))
+
+    ###########################################################################
+    # 5. Add unmatched names
+    ###########################################################################
+    unmatched_mask = (df_gbif.taxonID.isin(df_gbif_matches.taxonID)==False)
+    print('Adding unmatched entries from GBIF taxonomy, number of rows:', len(df_gbif[(unmatched_mask)]))
+    df_out = pd.concat([df_gbif_matches, df_gbif[(unmatched_mask)]])    
+
     ###########################################################################
     # 5. Output file
     ###########################################################################
-    # TODO include unmatched names in output
-    pd.concat([df_gbif_match_1,df_gbif_match_2]).to_csv(args.outputfile,sep='\t',index=False)
+    print('Outputting {} rows to {}'.format(len(df_out), args.outputfile))
+    df_out.to_csv(args.outputfile,sep='\t',index=False)
 
 def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['taxon_name']):
     column_mapper_source={id_col:'original_id',
