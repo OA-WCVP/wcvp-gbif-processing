@@ -25,6 +25,33 @@ Software package dependencies are specified in `requirements.txt`
 2. Activate the virtual environment: `source env/Scripts/activate`
 3. Install dependencies: `pip install -r requirements.txt`
 
+### Overview
+```mermaid
+graph TB
+
+    subgraph Data access
+        wcvptax[Download WCVP<br>taxon file: 'wcvp.txt']
+        gbiftax[Download GBIF backbone<br>taxonomy: 'gbif-taxonomy.zip']-->gbiftax_extract[Extract: 'Taxon.txt']
+        gbiftax_extract-->gbiftax_filtered[Filter to Tracheophyta<br>only: 'Taxon-Tracheophyta.txt']
+        wcvpdist[Download WCVP<br>dist file: 'wcvp_dist.txt']
+        gbifspec[Download GBIF specimens<br> with type status]
+    end
+
+    subgraph Processing
+        wcvptax----> gbif2wcvp
+        gbiftax_filtered-->gbif2wcvp[Integrate: 'gbif2wcvp.csv']
+    end
+
+    subgraph Reporting
+        taxa_with_types_in_gbif[How many taxa have type material in GBIF]
+        gbif2wcvp-->taxa_with_types_in_gbif
+        wcvpdist------>taxa_with_types_in_gbif
+        gbifspec------>taxa_with_types_in_gbif
+        taxa_with_types_in_natrange[How many taxa have type material held in native range]
+        taxa_with_types_in_gbif-->taxa_with_types_in_natrange
+    end
+```
+
 ### Seeing what will be done for each step
 
 A report of the actions that will be taken to build a particular Makefile target can be seen by using the `--dry-run` flag. For example to see the actions taken to process the `gbif2wcvp` target use `make gbif2wcvp --dry-run`.
