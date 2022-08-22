@@ -33,22 +33,27 @@ graph TB
         wcvptax[Download WCVP<br>taxon file: 'wcvp.txt']
         gbiftax[Download GBIF backbone<br>taxonomy: 'gbif-taxonomy.zip']-->gbiftax_extract[Extract: 'Taxon.txt']
         gbiftax_extract-->gbiftax_filtered[Filter to Tracheophyta<br>only: 'Taxon-Tracheophyta.txt']
-        wcvpdist[Download WCVP<br>dist file: 'wcvp_dist.txt']
         gbifspec[Download GBIF specimens<br> with type status]
+        wcvpdist[Download WCVP<br>dist file: 'wcvp_dist.txt']
     end
 
-    subgraph Processing
+    subgraph "Processing (i)"
         wcvptax----> gbif2wcvp
         gbiftax_filtered-->gbif2wcvp[Integrate: 'gbif2wcvp.csv']
     end
 
+    subgraph "Processing (ii)"
+        gbifspec---->locategbifholders[Add lat/long for holder institution]
+    end
+
     subgraph Reporting
+        direction LR
         taxa_with_types_in_gbif[How many taxa have type material in GBIF]
         gbif2wcvp-->taxa_with_types_in_gbif
-        wcvpdist------>taxa_with_types_in_gbif
-        gbifspec------>taxa_with_types_in_gbif
+        wcvpdist------->taxa_with_types_in_natrange
         taxa_with_types_in_natrange[How many taxa have type material held in native range]
         taxa_with_types_in_gbif-->taxa_with_types_in_natrange
+        locategbifholders---->taxa_with_types_in_natrange
     end
 ```
 
