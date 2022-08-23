@@ -9,7 +9,8 @@ This integration process has been adapted from one coded in R by [Barnaby Walker
 
 ## Research questions
 
-TBC
+1. How many WCVP taxa have type material in GBIF?
+1. How many WCVP taxa have type material held in their WCVP defined native range?
 
 ## How to use this repository
 
