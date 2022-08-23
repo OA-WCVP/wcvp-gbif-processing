@@ -1,6 +1,7 @@
 wcvp_name_url=https://www.dropbox.com/s/pkpv3tc5v9k0thh/wcvp_names.txt?dl=0
 wcvp_dist_url=https://www.dropbox.com/s/9vefyzzp978m2f1/wcvp_distribution.txt?dl=0
 gbif_taxonomy_url=https://hosted-datasets.gbif.org/datasets/backbone/current/backbone.zip
+tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level3.geojson
 
 python_launch_cmd=python
 python_launch_cmd=winpty python
@@ -33,7 +34,12 @@ downloads/gbif-taxonomy.zip:
 	wget -O $@ $(gbif_taxonomy_url)
 getgbif: downloads/gbif-taxonomy.zip
 
-dl: downloads/wcvp.txt downloads/gbif-taxonomy.zip
+# Download TDWG WGSRPD L3 as geojson
+downloads/tdwg_wgsrpd_l3.json:
+	mkdir -p downloads
+	wget -O $@ $(tdwg_wgsrpd_l3_url)
+
+dl: downloads/wcvp.txt downloads/wcvp_dist.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
 
 # Extract taxon file from GBIF backbone taxonomy
 data/Taxon.tsv: downloads/gbif-taxonomy.zip
@@ -78,7 +84,8 @@ data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md: taxa2gbift
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md
 
 # Analyse how many taxa have type material published from within native range
-# TBC
+data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
 
 all: data/gbif2wcvp.csv
 
