@@ -25,6 +25,8 @@ Software package dependencies are specified in `requirements.txt`
 2. Activate the virtual environment: `source env/Scripts/activate`
 3. Install dependencies: `pip install -r requirements.txt`
 
+**Note**: `geopandas` can be tricky to install on Windows, [NN](https://github.com/nickynicolson) has run the analysis process on the Microsoft Planetary Computer (MPC) to avoid installation issues. Unfortunately the environment exposed by the terminal in the MPC does not have the tool `make`. A [github issue](https://github.com/microsoft/PlanetaryComputer/issues/89) has been logged to request this, and includes a work-around to temporarily install make using `mamba install -y -c conda-forge make`. The commands managed by the Makefile also require the command line tool `jq`, similarly this can be installed on the MPC using `mamba install -y -c conda-forge jq`
+
 ### Overview
 ```mermaid
 graph TB
