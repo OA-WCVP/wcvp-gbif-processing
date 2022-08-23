@@ -1,2 +1,4 @@
+matplotlib==3.2
 pandas
+pygbif
 unidecode

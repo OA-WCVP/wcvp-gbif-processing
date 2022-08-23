@@ -1,0 +1,27 @@
+{
+    "creator": "nickyn",
+    "notificationAddresses": [
+      "n.nicolson@kew.org"
+    ],
+    "sendNotification": true,
+    "format": "SIMPLE_CSV",
+    "predicate": {
+      "type": "and",
+      "predicates": [
+        {
+          "type": "equals",
+          "key": "BASIS_OF_RECORD",
+          "value": "PRESERVED_SPECIMEN"
+        },
+        {
+            "type":"isNotNull",
+            "parameter":"TYPE_STATUS"
+        },
+        {
+            "type": "equals",
+            "key": "TAXON_KEY",
+            "value": "7707728" 
+        }
+      ]
+    }
+  }
