@@ -2,6 +2,7 @@ wcvp_name_url=https://www.dropbox.com/s/pkpv3tc5v9k0thh/wcvp_names.txt?dl=0
 wcvp_dist_url=https://www.dropbox.com/s/9vefyzzp978m2f1/wcvp_distribution.txt?dl=0
 gbif_taxonomy_url=https://hosted-datasets.gbif.org/datasets/backbone/current/backbone.zip
 tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level3.geojson
+ih_url="http://sweetgum.nybg.org/science/api/v1/institutions/search?dateModified=%3E01/01/2000&download=yes"
 
 python_launch_cmd=python
 python_launch_cmd=winpty python
@@ -38,6 +39,11 @@ getgbif: downloads/gbif-taxonomy.zip
 downloads/tdwg_wgsrpd_l3.json:
 	mkdir -p downloads
 	wget -O $@ $(tdwg_wgsrpd_l3_url)
+
+# Download IH datafile
+downloads/ih.txt:
+	mkdir -p downloads
+	wget -O $@ $(ih_url)
 
 dl: downloads/wcvp.txt downloads/wcvp_dist.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
 
@@ -76,7 +82,7 @@ data/gbif-types.zip: data/gbif-type-download.id
 	wget -O $@ $(download_link)
 
 # Process GBIF type data to add details of publishing organisation
-data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip
+data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt
 	$(python_launch_cmd) $^ $(limit_args) $@
 
 # Analyse how many taxa have type material in GBIF
