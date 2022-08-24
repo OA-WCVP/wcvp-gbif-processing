@@ -3,6 +3,7 @@ wcvp_dist_url=https://www.dropbox.com/s/9vefyzzp978m2f1/wcvp_distribution.txt?dl
 gbif_taxonomy_url=https://hosted-datasets.gbif.org/datasets/backbone/current/backbone.zip
 tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level3.geojson
 ih_url="http://sweetgum.nybg.org/science/api/v1/institutions/search?dateModified=%3E01/01/2000&download=yes"
+geonames_capital_cities_url=http://download.geonames.org/export/dump/cities15000.zip
 
 python_launch_cmd=python
 python_launch_cmd=winpty python
@@ -45,6 +46,11 @@ downloads/ih.txt:
 	mkdir -p downloads
 	wget -O $@ $(ih_url)
 
+# Download geonames capital cities
+downloads/cities15000.zip:
+	mkdir -p downloads	
+	wget -O $@ $(geonames_capital_cities_url)
+
 dl: downloads/wcvp.txt downloads/wcvp_dist.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
 
 # Extract taxon file from GBIF backbone taxonomy
@@ -82,7 +88,7 @@ data/gbif-types.zip: data/gbif-type-download.id
 	wget -O $@ $(download_link)
 
 # Process GBIF type data to add details of publishing organisation
-data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt
+data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt downloads/cities15000.zip
 	$(python_launch_cmd) $^ $(limit_args) $@
 
 # Analyse how many taxa have type material in GBIF
