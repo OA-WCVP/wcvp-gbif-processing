@@ -83,30 +83,32 @@ def main():
                     suffixes=['','_org'])
     df.rename(columns={'LEVEL3_COD':'publishingOrg_area_code_l3'},inplace=True)
 
-    # 3.3 Establish WGSRPD level 2 and level 1 codes from LEVEL3_COD ==========
-    for higher_level_code in ['region_code_l2','continent_code_l1']:
-        wgsrpd_mapper = df[['area_code_l3',higher_level_code]].drop_duplicates().set_index('area_code_l3')[higher_level_code].to_dict()
-        new_col = 'publishingOrg_' + higher_level_code
-        df[new_col] = df['publishingOrg_area_code_l3'].map(wgsrpd_mapper)
-    
-    # 3.4 Attach native distributions =========================================
+    # 3.3 Attach native distributions =========================================
     df = pd.merge(left=df,
                     right=df_dist[df_dist.introduced==0],
                     left_on='accepted_id',
                     right_on='plant_name_id',
                     how='left' )
         
+    # 3.4 Establish WGSRPD level 2 and level 1 codes from LEVEL3_COD ==========
+    for higher_level_code in ['region_code_l2','continent_code_l1']:
+        wgsrpd_mapper = df[['area_code_l3',higher_level_code]].drop_duplicates().set_index('area_code_l3')[higher_level_code].to_dict()
+        new_col = 'publishingOrg_' + higher_level_code
+        df[new_col] = df['publishingOrg_area_code_l3'].map(wgsrpd_mapper)
+   
     ###########################################################################
     # 4. Count number of taxa with type material served from within native range
     ###########################################################################
-    wgsrpd_columns = {'continent_code_l2':'publishingOrg_continent_code_l2',
+    wgsrpd_columns = {'continent_code_l1':'publishingOrg_continent_code_l1',
                         'region_code_l2':'publishingOrg_region_code_l2',
                         'area_code_l3':'publishingOrg_area_code_l3'}
+    summary_message=""
     for (distribution_loc, publishing_org_loc) in wgsrpd_columns.items():
         mask=(df[distribution_loc] == df[publishing_org_loc])
         accepted_id_served_from_within_native_range_count = df[mask].accepted_id.nunique()
         accepted_id_count = df.accepted_id.nunique()
-        summary_message=('{:.2%} taxa ({} of {}) are represented by type material served from within their native range in {}'.format(accepted_id_served_from_within_native_range_count/accepted_id_count, accepted_id_served_from_within_native_range_count, accepted_id_count, distribution_loc))
+        summary_message += ('{:.2%} taxa ({} of {}) are represented by type material served from within their native range in {}\n'.format(accepted_id_served_from_within_native_range_count/accepted_id_count, accepted_id_served_from_within_native_range_count, accepted_id_count, distribution_loc))
+    print(summary_message)
 
     # ###########################################################################
     # # 4. Output
