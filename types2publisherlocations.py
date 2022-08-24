@@ -42,7 +42,7 @@ def main():
     dfm=pd.DataFrame.from_dict(metadata).T
     # Join to original occurrence oriented dataframe    
     df = pd.merge(left=df
-                ,right=dfm[['key','title','latitude','longitude','country']]
+                ,right=dfm[['key','title','latitude','longitude','city','province','country']]
                 ,left_on='publishingOrgKey'
                 ,right_on='key'
                 ,how='left'
@@ -52,23 +52,31 @@ def main():
     # 3. Fill any gaps (those without lat/long in the GBIF registry) by doing
     # a name lookup to IH
     ###########################################################################
-    title_location_mapper = dict()
-    # Establish a mask to find records with no lat/long
-    coordinates_missing_mask=df.latitude.isnull()&df.longitude.isnull()
-    # Loop over records with missing lat/long, try to find matches in IH on title:
-    for title in df[coordinates_missing_mask].title.unique():
-        mask = (df_ih.organization==title)
-        if len(df_ih[mask]) > 0:
-            # Save in mapper data structure
-            title_location_mapper[title] = (df_ih[mask].head(n=1).latitude.iloc[0],df_ih[mask].head(n=1).longitude.iloc[0])
-    # Map IH derived lat/long data to temporary column
-    df.loc[coordinates_missing_mask,'location_temp']=df[coordinates_missing_mask].title.map(title_location_mapper)
-    # Read values from temp column into permanent lat/long home
-    coordinates_missing_mask = df.location_temp.notnull()
-    df.loc[coordinates_missing_mask,'latitude']=df[coordinates_missing_mask].location_temp.apply(lambda x: x[0])
-    df.loc[coordinates_missing_mask,'longitude']=df[coordinates_missing_mask].location_temp.apply(lambda x: x[1])
-    # Drop temporary column
-    df.drop(columns=['location_temp'],inplace=True)
+
+    for (local_column, ih_column) in {'title':'organization','city':'physicalCity'}.items():
+        location_mapper = dict()
+        # Establish a mask to find records with no lat/long
+        coordinates_missing_mask=df.latitude.isnull()&df.longitude.isnull()
+        # Loop over records with missing lat/long, try to find matches in IH on link_column:
+        for local_value in df[coordinates_missing_mask][local_column].unique():
+            mask = (df_ih[ih_column]==local_value)
+            if len(df_ih[mask]) > 0:
+                # Save in mapper data structure
+                location_mapper[local_value] = (df_ih[mask].head(n=1).latitude.iloc[0],df_ih[mask].head(n=1).longitude.iloc[0])
+        # Map IH derived lat/long data to temporary column
+        df.loc[coordinates_missing_mask,'location_temp']=df[coordinates_missing_mask][local_column].map(location_mapper)
+        # Read values from temp column into permanent lat/long home
+        coordinates_missing_mask = df.location_temp.notnull()
+        df.loc[coordinates_missing_mask,'latitude']=df[coordinates_missing_mask].location_temp.apply(lambda x: x[0])
+        df.loc[coordinates_missing_mask,'longitude']=df[coordinates_missing_mask].location_temp.apply(lambda x: x[1])
+        # Drop temporary column
+        df.drop(columns=['location_temp'],inplace=True)
+
+    coordinates_missing_mask=(df.latitude.isnull()&df.longitude.isnull())
+    print(df[coordinates_missing_mask].groupby(['publishingOrgKey','title','city','province','country']).size())
+    print(df[coordinates_missing_mask][['publishingOrgKey','title','city','province','country']].drop_duplicates())
+    print(df[coordinates_missing_mask].groupby('title').size().sum())
+    print(df[~coordinates_missing_mask].groupby('title').size().sum())
 
     ###########################################################################
     # 4. Output
