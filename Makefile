@@ -93,7 +93,7 @@ data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md: taxa2gbift
 data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
 
-all: data/gbif2wcvp.csv
+all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md
 
 clean:
 	rm -rf data
