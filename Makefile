@@ -103,7 +103,7 @@ all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md
 
 archive:
 	mkdir -p archive
-	zip archive/data-$(date_formatted).zip data/* -r
+	zip archive/data-$(date_formatted).zip data/*.md -r 
 	zip archive/downloads-$(date_formatted).zip downloads/* -r
 
 clean:
