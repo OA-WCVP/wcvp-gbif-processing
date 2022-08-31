@@ -101,6 +101,11 @@ data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.
 
 all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md
 
+archive:
+	mkdir -p archive
+	zip archive/data-$(date_formatted).zip data/* -r
+	zip archive/downloads-$(date_formatted).zip downloads/* -r
+
 clean:
 	rm -rf data
 
