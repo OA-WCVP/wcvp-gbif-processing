@@ -101,11 +101,16 @@ data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.
 
 all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md
 
-archive:
-	mkdir -p archive
-	zip archive/data-$(date_formatted).zip data/*.md -r 
-	zip archive/downloads-$(date_formatted).zip downloads/* -r
+data_archive_zip:=$(shell basename $(CURDIR))-data.zip
+downloads_archive_zip:=$(shell basename $(CURDIR))-downloads.zip
 
+archive:
+	mkdir -p archive	
+	echo "Archived on $(date_formatted)" >> data/archive-info.txt
+	zip archive/$(data_archive_zip) data/*.md -r
+	echo "Archived on $(date_formatted)" >> downloads/archive-info.txt
+	zip archive/$(downloads_archive_zip) downloads/* -r
+	
 clean:
 	rm -rf data
 
