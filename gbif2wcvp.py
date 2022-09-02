@@ -11,6 +11,9 @@ def main():
     parser.add_argument('--delimiter_gbif', type=str, default='\t')
     parser.add_argument("inputfile_wcvp", type=str)
     parser.add_argument('--delimiter_wcvp', type=str, default='|')
+    parser.add_argument("--filter", action='store_true')
+    parser.add_argument('--filter_name_prefix', type=str, default='Roella retic')
+    
     parser.add_argument("outputfile", type=str)
     args = parser.parse_args()
 
@@ -30,6 +33,11 @@ def main():
     # where publnote is one of: cited, made, oppr, publ, ref, validly)
     # These can be retrieved as follows: df[(df_gbif.name != df_gbif.canonicalName)]
 
+    if args.filter:
+        dropmask = (df_gbif.scientificName.str.startswith(args.filter_name_prefix)==False)
+        df_gbif.drop(df_gbif[dropmask].index,inplace=True)
+        print(df_gbif.T)
+
     ###########################################################################
     # 2. Read WCVP input file and process
     ###########################################################################
@@ -46,63 +54,84 @@ def main():
     df_wcvp['taxon_name_plus_authors'] = df_wcvp.apply(lambda row: '{} {}'.format(row['taxon_name'],row['taxon_authors']), axis=1)
     df_wcvp['taxon_name_minus_authors'] = df_wcvp['taxon_name']
     df_wcvp.drop(columns=['taxon_name'],inplace=True)
+    #
+    # 2.4 Add genericName column
+    df_wcvp['genericName'] = df_wcvp['genus']
 
+    if args.filter:
+        dropmask = (df_wcvp.taxon_name_plus_authors.str.startswith(args.filter_name_prefix)==False)
+        df_wcvp.drop(df_wcvp[dropmask].index,inplace=True)
+        print(df_wcvp.T)
+    
     ###########################################################################
     # 3. Match names
     ###########################################################################
 
-    # 3.1 Matching INCLUDING author strings ===================================
-    df_match = matchNamesExactly(df_gbif.rename(columns={'scientificName':'taxon_name'})
-                                , df_wcvp.rename(columns={'taxon_name_plus_authors':'taxon_name'})
-                                , id_col='taxonID'
-                                , name_col='taxon_name'
-                                , match_cols=['family','genus','taxon_name'])    
-    num_ids_matched_stage_1 = df_match[df_match.match_id.notnull()].original_id.nunique()
-    print('Number of IDs matched at stage 1: ', num_ids_matched_stage_1)
-    df_gbif_match_1 = pd.merge(left=df_match[df_match.match_id.notnull()]
-                            , right=df_gbif[['taxonID','scientificName']].rename(columns={'scientificName':'original_name'})
-                            , left_on='original_id'
-                            , right_on='taxonID'
-                            , how='left')
+    # 3.1 Gather list of homonyms as these will be excluded from some of the looser matching strategies
+    dfg = df_gbif.groupby('name').agg({'family':'nunique'})
+    print('Found {} homonyms: same name (without authors), different family'.format(len(dfg[dfg.family>1])))
+    homonym_ids = df_gbif[df_gbif.name.isin(dfg[dfg.family>1].index)].taxonID
+    print('Homonyms translate to {} source records'.format(len(homonym_ids)))
+    #
+    # 3.2 Process a sequence of match strategies, first strict, later looser
+    df_matches = None
+    match_configurations = [{'gbif_name_source':'scientificName','wcvp_name_source':'taxon_name_plus_authors','match_cols':['family','genericName'],'exclude_homonyms':False},
+                            {'gbif_name_source':'scientificName','wcvp_name_source':'taxon_name_plus_authors','match_cols':['genericName'],'exclude_homonyms':False},
+                            {'gbif_name_source':'name','wcvp_name_source':'taxon_name_minus_authors','match_cols':['family','genericName'],'exclude_homonyms':True}]
 
-    # 3.2 Matching EXCLUDING author strings ===================================
-    mask = (df_gbif.scientificName.isin(df_match[df_match.match_id.notnull()].match_name)==False)
-    df_match = matchNamesExactly(df_gbif[mask].rename(columns={'name':'taxon_name'})
-                                , df_wcvp.rename(columns={'taxon_name_minus_authors':'taxon_name'})
+    matched_ids = []
+    for i, match_configuration in enumerate(match_configurations):
+        # Exclude anything already matched in previous stages
+        mask = (df_gbif.taxonID.isin(matched_ids)==False)
+        # We may also exclude homonyms from the looser match strategies
+        if match_configuration['exclude_homonyms']:
+            print('Excluding homonyms')
+            mask = mask & (df_gbif.taxonID.isin(homonym_ids)==False)
+        # We temporarily apply column renames so that the specified name columns 
+        # are both named "match_name" for a simpler pandas join
+        gbif_renames = {match_configuration['gbif_name_source']:'match_name'}
+        wcvp_renames = {match_configuration['wcvp_name_source']:'match_name'}
+        df_match = matchNamesExactly(df_gbif[mask].rename(columns=gbif_renames)
+                                , df_wcvp.rename(columns=wcvp_renames)
                                 , id_col='taxonID'
-                                , name_col='taxon_name'
-                                , match_cols=['taxon_name'])    
-    num_ids_matched_stage_2 = df_match[df_match.match_id.notnull()].original_id.nunique()
-    print('Number of IDs matched at stage 2: ', num_ids_matched_stage_2)
-    df_gbif_match_2 = pd.merge(left=df_match[df_match.match_id.notnull()]
-                            , right=df_gbif[['taxonID','name']].rename(columns={'name':'original_name'})
-                            , left_on='original_id'
-                            , right_on='taxonID'
-                            , how='left')
-
-    # 3.3 Calculate total left unmatched ======================================
-    num_unmatched = df_gbif.taxonID.nunique() - num_ids_matched_stage_1 - num_ids_matched_stage_2
-    print('Number unmatched:', num_unmatched)
+                                , name_col='match_name'
+                                , match_cols=match_configuration['match_cols'])    
+        num_ids_matched = df_match[df_match.match_id.notnull()].original_id.nunique()
+        print('Number of IDs matched at stage {}: {}'.format(i, num_ids_matched))
+        df_match = pd.merge(left=df_match[df_match.match_id.notnull()]
+                                , right=df_gbif[['taxonID','scientificName','name']]
+                                , left_on='original_id'
+                                , right_on='taxonID'
+                                , how='left')
+        df_match['original_name'] = df_match[match_configuration['gbif_name_source']]
+        # Save match stage for debugging any suspicious matches
+        df_match['match_stage'] = [i] * len(df_match)
+        df_matches = pd.concat([df_matches,df_match])
+        # Update the list of matched IDs so that anything that was matched can be 
+        # excluded from later (looser) match strategies
+        matched_ids = list(df_matches[df_matches.match_id.notnull()].taxonID.unique())
+    #
+    # 3.3 Output stats on matches / stage and total left unmatched
+    print('Matches by match stage:')
+    print(df_matches[df_matches.match_id.notnull()].groupby('match_stage').taxonID.nunique())
+    print('Number unmatched = {}'.format(df_gbif.taxonID.nunique() - df_matches[df_matches.match_id.notnull()].taxonID.nunique()))
 
     ###########################################################################
     # 4. Resolve names - getting data about the accepted name and processing 
     # those which match to multiple names to arrive at a single decision
     ###########################################################################
-    df_gbif_match_1 = resolveAccepted(df_gbif_match_1)
-    df_gbif_match_1 = resolveMultipleMatches(df_gbif_match_1)
 
-    df_gbif_match_2 = resolveAccepted(df_gbif_match_2)
-    df_gbif_match_2 = resolveMultipleMatches(df_gbif_match_2)
+    df_matches = resolveAccepted(df_matches)
+    df_matches = resolveMultipleMatches(df_matches)
 
-    df_gbif_matches = pd.concat([df_gbif_match_1,df_gbif_match_2])
-    print('Concatenated GBIF matches, total rows: :', len(df_gbif_matches))
 
     ###########################################################################
     # 5. Add unmatched names
     ###########################################################################
-    unmatched_mask = (df_gbif.taxonID.isin(df_gbif_matches.taxonID)==False)
+
+    unmatched_mask = (df_gbif.taxonID.isin(df_matches.taxonID)==False)
     print('Adding unmatched entries from GBIF taxonomy, number of rows:', len(df_gbif[(unmatched_mask)]))
-    df_out = pd.concat([df_gbif_matches, df_gbif[(unmatched_mask)]])    
+    df_out = pd.concat([df_matches, df_gbif[(unmatched_mask)]])    
 
     ###########################################################################
     # 5. Output file
@@ -111,6 +140,7 @@ def main():
     df_out.to_csv(args.outputfile,sep='\t',index=False)
 
 def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['taxon_name']):
+    print('matchNamesExactly: name_col: {}, match_cols: {}'.format(name_col, match_cols))
     column_mapper_source={id_col:'original_id',
                     name_col:'match_name',
                     'plant_name_id':'match_id',
@@ -120,12 +150,12 @@ def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['ta
                     'accepted_plant_name_id':'accepted_id'}
     df_join = pd.merge(left=df
                         ,right=df_wcvp
-                        ,left_on=match_cols
-                        ,right_on=match_cols
+                        ,left_on=match_cols+[name_col]
+                        ,right_on=match_cols+[name_col]
                         ,how='left')
     df_join.rename(columns=column_mapper_source,inplace=True)
     column_mapper_wcvp = {'plant_name_id':'plant_name_id',
-                    'taxon_name':'accepted_name',
+                    name_col:'accepted_name',
                     'taxon_authors':'accepted_authors',
                     'taxon_rank':'accepted_rank'}
     df_join = pd.merge(left=df_join[list(column_mapper_source.values())] 
@@ -133,7 +163,6 @@ def matchNamesExactly(df, df_wcvp, id_col='id', name_col='name', match_cols=['ta
                     ,left_on='accepted_id'
                     ,right_on='plant_name_id'
                     ,how='left')
-
     printMatchStatistics(df_join)
 
     # Return complete join datastructure
