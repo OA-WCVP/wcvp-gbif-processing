@@ -5,8 +5,8 @@ tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level
 ih_url="http://sweetgum.nybg.org/science/api/v1/institutions/search?dateModified=%3E01/01/2000&download=yes"
 geonames_capital_cities_url=http://download.geonames.org/export/dump/cities15000.zip
 
-python_launch_cmd=python
 python_launch_cmd=winpty python
+python_launch_cmd=python
 
 date_formatted=$(shell date +%Y%m%d-%H%M%S)
 
@@ -21,35 +21,35 @@ password=YOUR_GBIF_PASSWORD
 # Download WCVP taxonomy
 downloads/wcvp.txt:
 	mkdir -p downloads
-	wget -O $@ $(wcvp_name_url)
+	wget --quiet -O $@ $(wcvp_name_url)
 getwcvp: downloads/wcvp.txt
 
 # Download WCVP distributions
 downloads/wcvp_dist.txt:
 	mkdir -p downloads
-	wget -O $@ $(wcvp_dist_url)
+	wget --quiet -O $@ $(wcvp_dist_url)
 getwcvpdist: downloads/wcvp_dist.txt
 
 # Download GBIF taxonomy
 downloads/gbif-taxonomy.zip:
 	mkdir -p downloads
-	wget -O $@ $(gbif_taxonomy_url)
+	wget --quiet -O $@ $(gbif_taxonomy_url)
 getgbif: downloads/gbif-taxonomy.zip
 
 # Download TDWG WGSRPD L3 as geojson
 downloads/tdwg_wgsrpd_l3.json:
 	mkdir -p downloads
-	wget -O $@ $(tdwg_wgsrpd_l3_url)
+	wget --quiet -O $@ $(tdwg_wgsrpd_l3_url)
 
 # Download IH datafile
 downloads/ih.txt:
 	mkdir -p downloads
-	wget -O $@ $(ih_url)
+	wget --quiet -O $@ $(ih_url)
 
 # Download geonames capital cities
 downloads/cities15000.zip:
 	mkdir -p downloads	
-	wget -O $@ $(geonames_capital_cities_url)
+	wget --quiet -O $@ $(geonames_capital_cities_url)
 
 dl: downloads/wcvp.txt downloads/wcvp_dist.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
 
@@ -91,7 +91,7 @@ gbif_download_url=https://api.gbif.org/v1/occurrence/download/request/0429412-21
 
 data/gbif-types.zip: 
 	# wget it
-	wget -O $@ $(gbif_download_url)
+	wget --quiet -O $@ $(gbif_download_url)
 
 # Process GBIF type data to add details of publishing organisation
 data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt downloads/cities15000.zip
