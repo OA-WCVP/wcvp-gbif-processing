@@ -5,6 +5,7 @@ Match GBIF and WCVP taxonomies, such that an assessment of GBIF holdings can be 
 
 1. How many WCVP taxa have type material in GBIF?
 1. How many WCVP taxa have type material mobilised from within their WCVP defined native range?
+1. Are there differences pre / post CBD / Nagoya?
 
 ## Overview
 ```mermaid
