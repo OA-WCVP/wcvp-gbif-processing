@@ -27,7 +27,7 @@ def main():
     ###########################################################################
     #
     # 1.1 Taxonomy (WCVP and GBIF integrated) =================================
-    df_tax = pd.read_csv(args.inputfile_tax, sep=args.delimiter_tax, nrows=args.limit)
+    df_tax = pd.read_csv(args.inputfile_tax, sep=args.delimiter_tax, nrows=args.limit,usecols=['original_id','accepted_id'])
     print('Read {} taxonomy lines from: {}'.format(len(df_tax), args.inputfile_tax))
 
     # 1.2 WCVP distributions ==================================================
