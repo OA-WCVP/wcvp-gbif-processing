@@ -3,6 +3,7 @@ pd.set_option('display.max_rows',100)
 import argparse
 from unidecode import unidecode
 import re
+import numpy as np
 
 def main():
     parser = argparse.ArgumentParser()
@@ -44,6 +45,7 @@ def main():
     #
     # 2.1 Read file ===========================================================
     df_wcvp = pd.read_csv(args.inputfile_wcvp, sep=args.delimiter_wcvp, nrows=args.limit)
+    df_wcvp = df_wcvp.replace({np.nan:None})
     print('Read {} WCVP lines from: {}'.format(len(df_wcvp), args.inputfile_wcvp))
     #
     # 2.2 Process homotypic synonym status ====================================
@@ -134,7 +136,16 @@ def main():
     df_out = pd.concat([df_matches, df_gbif[(unmatched_mask)]])    
 
     ###########################################################################
-    # 5. Output file
+    # 6. Add date of publication of name
+    ###########################################################################
+
+    print('Adding date of publication of name')
+    df_out = pd.merge(left=df_out,right=df_wcvp[['plant_name_id','first_published']],left_on='plant_name_id',right_on='plant_name_id',how='left')
+    mask = (df_out.first_published.notnull())
+    df_out.loc[mask,'first_published_yr'] = df_out[mask]['first_published'].apply(cleanPublicationYear)
+
+    ###########################################################################
+    # 7. Output file
     ###########################################################################
     print('Outputting {} rows to {}'.format(len(df_out), args.outputfile))
     df_out.to_csv(args.outputfile,sep='\t',index=False)
@@ -256,6 +267,20 @@ def resolveAccepted(df, blank_columns=False):
             df.loc[~df.match_status.isin(['Accepted','Homotypic Synonym','Orthographic']),dest_column]= None
     # print(df)
     return df
+
+def cleanPublicationYear(s):
+    year = None
+    if s is not None:
+        s = s.replace('(','').replace(')','')
+        if len(s) == len('yyyy'):
+            year = s
+        elif 'publ. ' in s:
+            yearpart = s.split('publ. ',1)[1]
+            if len(yearpart) == len('yyyy'):
+                year = yearpart
+    if year is not None and (re.match(r'^1[7-9][0-9][0-9]$',year) or re.match(r'^20[0-2][0-9]$',year)):
+        year = int(year)
+    return year
 
 if __name__ == '__main__':
     main()

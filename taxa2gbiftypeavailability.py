@@ -22,7 +22,7 @@ def main():
     ###########################################################################
     #
     # 1.1 Taxonomy (WCVP and GBIF integrated) =================================
-    df_tax = pd.read_csv(args.inputfile_tax, sep=args.delimiter_tax, nrows=args.limit, usecols=['original_id','accepted_id'])
+    df_tax = pd.read_csv(args.inputfile_tax, sep=args.delimiter_tax, nrows=args.limit, usecols=['original_id','accepted_id','first_published_yr'])
     print('Read {} taxonomy lines from: {}'.format(len(df_tax), args.inputfile_tax))
 
     # 1.2 Occurrences from GBIF with type status set ==========================
@@ -36,9 +36,14 @@ def main():
 
     # 1.4 Drop those outside specified date range
     if args.year_min is not None:
+        # Occurrences
         dropmask = df_occ.year.notnull() & (df_occ.year > args.year_min)
         df_occ.drop(df_occ[dropmask].index,inplace=True)
         print('Dropped occurrences outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_occ)))
+        # Taxonomy
+        dropmask = df_tax.first_published_yr.notnull() & (df_tax.first_published_yr.year > args.year_min)
+        df_tax.drop(df_tax[dropmask].index,inplace=True)
+        print('Dropped taxonomy outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_tax)))
 
     ###########################################################################
     # 2. Attach integrated taxonomy to GBIF occurrence type data
