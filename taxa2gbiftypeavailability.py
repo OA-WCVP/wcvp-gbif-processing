@@ -41,7 +41,7 @@ def main():
         df_occ.drop(df_occ[dropmask].index,inplace=True)
         print('Dropped occurrences outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_occ)))
         # Taxonomy
-        dropmask = df_tax.first_published_yr.notnull() & (df_tax.first_published_yr.year > args.year_min)
+        dropmask = df_tax.first_published_yr.notnull() & (df_tax.first_published_yr > args.year_min)
         df_tax.drop(df_tax[dropmask].index,inplace=True)
         print('Dropped taxonomy outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_tax)))
 
