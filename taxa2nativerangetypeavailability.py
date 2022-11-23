@@ -46,11 +46,11 @@ def main():
     # 1.3.2 Drop data outside specified daterange ==============================
     if args.year_min is not None:
         # Occurrences
-        dropmask = df_occ.year.notnull() & (df_occ.year > args.year_min)
+        dropmask = df_occ.year.notnull() & (df_occ.year < args.year_min)
         df_occ.drop(df_occ[dropmask].index,inplace=True)
         print('Dropped occurrences outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_occ)))
         # Taxonomy
-        dropmask = df_tax.first_published_yr.notnull() & (df_tax.first_published_yr.year > args.year_min)
+        dropmask = df_tax.first_published_yr.notnull() & (df_tax.first_published_yr.year < args.year_min)
         df_tax.drop(df_tax[dropmask].index,inplace=True)
         print('Dropped taxonomy outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_tax)))
 
