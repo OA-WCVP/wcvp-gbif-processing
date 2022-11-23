@@ -1,0 +1,31 @@
+name: Makefile CI
+
+on:
+  push:
+    tags:        
+      - v*.**
+      
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Create download dir
+      run: mkdir -p downloads
+
+    - name: Install python dependencies
+      run: pip install -r requirements.txt
+      
+    - name: Build reports and archive into a zip
+      run: make archive
+      
+    - name: Release with built documents
+      uses: softprops/action-gh-release@v1
+      with:
+        files: archive/type-reports.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+          
