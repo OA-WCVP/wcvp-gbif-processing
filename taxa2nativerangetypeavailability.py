@@ -4,6 +4,7 @@ import argparse
 from unidecode import unidecode
 import re
 from pygbif import registry
+import numpy as np
 
 def main():
     parser = argparse.ArgumentParser()
@@ -27,8 +28,9 @@ def main():
     ###########################################################################
     #
     # 1.1 Taxonomy (WCVP and GBIF integrated) =================================
-    df_tax = pd.read_csv(args.inputfile_tax, sep=args.delimiter_tax, nrows=args.limit,usecols=['original_id','accepted_id'])
+    df_tax = pd.read_csv(args.inputfile_tax, sep=args.delimiter_tax, nrows=args.limit,usecols=['original_id','accepted_id','first_published_yr'])
     print('Read {} taxonomy lines from: {}'.format(len(df_tax), args.inputfile_tax))
+    df_tax = df_tax.replace({np.nan:None})
 
     # 1.2 WCVP distributions ==================================================
     df_dist = pd.read_csv(args.inputfile_dist, sep=args.delimiter_dist, nrows=args.limit)
@@ -41,11 +43,16 @@ def main():
     dropmask = df_occ.typeStatus.isin(['NOTATYPE'])
     df_occ.drop(df_occ[dropmask].index,inplace=True)
     print('Dropped occurrences flagged NOTATYPE, retained {} lines'.format(len(df_occ)))
-    # 1.3.2 Drop GBIF occurrences outside specified daterange ==============================
+    # 1.3.2 Drop data outside specified daterange ==============================
     if args.year_min is not None:
+        # Occurrences
         dropmask = df_occ.year.notnull() & (df_occ.year > args.year_min)
         df_occ.drop(df_occ[dropmask].index,inplace=True)
         print('Dropped occurrences outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_occ)))
+        # Taxonomy
+        dropmask = df_tax.first_published_yr.notnull() & (df_tax.first_published_yr.year > args.year_min)
+        df_tax.drop(df_tax[dropmask].index,inplace=True)
+        print('Dropped taxonomy outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_tax)))
 
     # 1.4 Publishing organisation locations (GBIF) ============================
     df_publ = pd.read_csv(args.inputfile_publ, sep=args.delimiter_publ, nrows=args.limit, usecols=['publishingOrgKey','latitude','longitude','country'])
