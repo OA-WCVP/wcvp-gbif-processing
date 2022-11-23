@@ -25,7 +25,7 @@ jobs:
     - name: Release with built documents
       uses: softprops/action-gh-release@v1
       with:
-        files: archive/type-reports.zip
+        files: archive/wcvp-gbif-processing.zip
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
           
