@@ -116,11 +116,11 @@ cbd_impl_year:=1992
 
 # Analyse how many taxa have type material in GBIF
 data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
-	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md
+	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.md
 
 # Analyse how many taxa have type material published from within native range
 data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
-	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
+	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.md
 
 ###############################################################################
 # Post-Nagoya
@@ -129,11 +129,11 @@ nagoya_impl_year:=2014
 
 # Analyse how many taxa have type material in GBIF
 data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
-	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md
+	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.md
 
 # Analyse how many taxa have type material published from within native range
 data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
-	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
+	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.md
 
 
 all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md data/taxa2gbiftypeavailability-cbd.md data/taxa2nativerangetypeavailability-cbd.md data/taxa2gbiftypeavailability-nagoya.md data/taxa2nativerangetypeavailability-nagoya.md
