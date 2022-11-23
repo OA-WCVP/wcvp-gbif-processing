@@ -81,6 +81,8 @@ def main():
     ###########################################################################
     #
     # 3.1 Attach integrated taxonomy to GBIF occurrence type data==============
+    df_tax['original_id']=df_tax['original_id'].astype(int)
+    df_occ['taxonKey']=df_occ['taxonKey'].astype(int)
     df = pd.merge(left=df_tax,
                     right=df_occ,
                     left_on='original_id',
