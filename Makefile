@@ -78,18 +78,28 @@ data/gbif-type-download.id: resources/gbif-type-specimen-download.json
 getdownloadstatus: data/gbif-type-download.id
 	curl -Ss https://api.gbif.org/v1/occurrence/download/$(shell cat $^) | jq .
 
-data/gbif-types.zip: data/gbif-type-download.id
-	# Get download ID from file
-	$(eval download_id:=$(shell cat $^))
-	# Get download link from occurrence download service
-	# Will jq throw an error if downloadLink is not found?
-	$(eval download_link:=$(shell curl -Ss https://api.gbif.org/v1/occurrence/download/$(download_id) | jq '.downloadLink'))
+# data/gbif-types.zip: data/gbif-type-download.id
+# 	# Get download ID from file
+# 	$(eval download_id:=$(shell cat $^))
+# 	# Get download link from occurrence download service
+# 	# Will jq throw an error if downloadLink is not found?
+# 	$(eval download_link:=$(shell curl -Ss https://api.gbif.org/v1/occurrence/download/$(download_id) | jq '.downloadLink'))
+# 	# wget it
+# 	wget -O $@ $(download_link)
+
+gbif_download_url=https://api.gbif.org/v1/occurrence/download/request/0429412-210914110416597.zip
+
+data/gbif-types.zip: 
 	# wget it
-	wget -O $@ $(download_link)
+	wget -O $@ $(gbif_download_url)
 
 # Process GBIF type data to add details of publishing organisation
 data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt downloads/cities15000.zip
 	$(python_launch_cmd) $^ $(limit_args) $@
+
+
+###############################################################################
+# All types
 
 # Analyse how many taxa have type material in GBIF
 data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
@@ -99,7 +109,34 @@ data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md: taxa2gbift
 data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
 
-all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md
+###############################################################################
+# Post-CBD
+
+cbd_impl_year:=1992
+
+# Analyse how many taxa have type material in GBIF
+data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
+	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md
+
+# Analyse how many taxa have type material published from within native range
+data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
+
+###############################################################################
+# Post-Nagoya
+
+nagoya_impl_year:=2014
+
+# Analyse how many taxa have type material in GBIF
+data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
+	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md
+
+# Analyse how many taxa have type material published from within native range
+data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
+
+
+all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md data/taxa2gbiftypeavailability-cbd.md data/taxa2nativerangetypeavailability-cbd.md data/taxa2gbiftypeavailability-nagoya.md data/taxa2nativerangetypeavailability-nagoya.md
 
 data_archive_zip:=$(shell basename $(CURDIR))-data.zip
 downloads_archive_zip:=$(shell basename $(CURDIR))-downloads.zip

@@ -12,6 +12,7 @@ def main():
     parser.add_argument('--delimiter_tax', type=str, default='\t')
     parser.add_argument("inputfile_occ", type=str)
     parser.add_argument('--delimiter_occ', type=str, default='\t')
+    parser.add_argument('--year_min', type=int, default=None)
     parser.add_argument("outputfile_data", type=str)
     parser.add_argument("outputfile_md", type=str)
     args = parser.parse_args()
@@ -31,7 +32,13 @@ def main():
     # 1.3 Drop those with typestatus "NOTATYPE"
     dropmask = df_occ.typeStatus.isin(['NOTATYPE'])
     df_occ.drop(df_occ[dropmask].index,inplace=True)
-    print('Retained {} type occurrence GBIF lines'.format(len(df_occ)))
+    print('Dropped occurrences flagged NOTATYPE, retained {} lines'.format(len(df_occ)))
+
+    # 1.4 Drop those outside specified date range
+    if args.year_min is not None:
+        dropmask = df_occ.year.notnull() & (df_occ.year > args.year_min)
+        df_occ.drop(df_occ[dropmask].index,inplace=True)
+        print('Dropped occurrences outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_occ)))
 
     ###########################################################################
     # 2. Attach integrated taxonomy to GBIF occurrence type data

@@ -13,6 +13,7 @@ def main():
     parser.add_argument("inputfile_dist", type=str)
     parser.add_argument('--delimiter_dist', type=str, default='|')
     parser.add_argument("inputfile_occ", type=str)
+    parser.add_argument('--year_min', type=int, default=None)
     parser.add_argument('--delimiter_occ', type=str, default='\t')
     parser.add_argument("inputfile_publ", type=str)
     parser.add_argument('--delimiter_publ', type=str, default='\t')
@@ -34,12 +35,17 @@ def main():
     print('Read {} WCVP distributions lines from: {}'.format(len(df_dist), args.inputfile_dist))
 
     # 1.3 Occurrences from GBIF with type status set ==========================
-    df_occ = pd.read_csv(args.inputfile_occ, sep=args.delimiter_occ, nrows=args.limit, usecols=['gbifID','typeStatus','taxonKey','publishingOrgKey'])
+    df_occ = pd.read_csv(args.inputfile_occ, sep=args.delimiter_occ, nrows=args.limit, usecols=['gbifID','typeStatus','taxonKey','publishingOrgKey','year'])
     print('Read {} type occurrence GBIF lines from: {}'.format(len(df_occ), args.inputfile_occ))
     # 1.3.1 Drop GBIF occurrences with typestatus "NOTATYPE" ===============================
     dropmask = df_occ.typeStatus.isin(['NOTATYPE'])
     df_occ.drop(df_occ[dropmask].index,inplace=True)
-    print('Retained {} type occurrence GBIF lines'.format(len(df_occ)))
+    print('Dropped occurrences flagged NOTATYPE, retained {} lines'.format(len(df_occ)))
+    # 1.3.2 Drop GBIF occurrences outside specified daterange ==============================
+    if args.year_min is not None:
+        dropmask = df_occ.year.notnull() & (df_occ.year > args.year_min)
+        df_occ.drop(df_occ[dropmask].index,inplace=True)
+        print('Dropped occurrences outside date range ({}-date), retained {} lines'.format(args.year_min, len(df_occ)))
 
     # 1.4 Publishing organisation locations (GBIF) ============================
     df_publ = pd.read_csv(args.inputfile_publ, sep=args.delimiter_publ, nrows=args.limit, usecols=['publishingOrgKey','latitude','longitude','country'])
