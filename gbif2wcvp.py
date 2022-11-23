@@ -280,6 +280,8 @@ def cleanPublicationYear(s):
                 year = yearpart
     if year is not None and (re.match(r'^1[7-9][0-9][0-9]$',year) or re.match(r'^20[0-2][0-9]$',year)):
         year = int(year)
+    else:
+        year = None
     return year
 
 if __name__ == '__main__':
