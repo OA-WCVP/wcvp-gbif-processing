@@ -141,7 +141,7 @@ all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md 
 data_archive_zip:=$(shell basename $(CURDIR))-data.zip
 downloads_archive_zip:=$(shell basename $(CURDIR))-downloads.zip
 
-archive: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md
+archive: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md  data/taxa2gbiftypeavailability-cbd.md data/taxa2nativerangetypeavailability-cbd.md data/taxa2gbiftypeavailability-nagoya.md data/taxa2nativerangetypeavailability-nagoya.md
 	mkdir -p archive	
 	echo "Archived on $(date_formatted)" >> data/archive-info.txt
 	zip archive/$(data_archive_zip) data/*.md -r
