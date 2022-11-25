@@ -126,7 +126,7 @@ def main():
         mask=(df[distribution_loc] == df[publishing_org_loc])
         accepted_id_served_from_within_native_range_count = df[mask].accepted_id.nunique()
         accepted_id_count = df.accepted_id.nunique()
-        summary_message += ('{:.2%} taxa ({} of {}) are represented by type material served from within their native range in {}\n'.format(accepted_id_served_from_within_native_range_count/accepted_id_count, accepted_id_served_from_within_native_range_count, accepted_id_count, distribution_loc))
+        summary_message += ('- {:.2%} taxa ({} of {}) are represented by type material served from within their native range in {}\n'.format(accepted_id_served_from_within_native_range_count/accepted_id_count, accepted_id_served_from_within_native_range_count, accepted_id_count, distribution_loc))
     print(summary_message)
 
     # ###########################################################################
