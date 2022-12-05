@@ -1,5 +1,4 @@
-wcvp_name_url=https://www.dropbox.com/s/pkpv3tc5v9k0thh/wcvp_names.txt?dl=0
-wcvp_dist_url=https://www.dropbox.com/s/9vefyzzp978m2f1/wcvp_distribution.txt?dl=0
+wcvp_zip_url=http://sftp.kew.org/pub/data-repositories/WCVP/Special_Issue_28_Feb_2022/wcvp_names_and_distribution_special_issue_28_feb_2022.zip
 gbif_taxonomy_url=https://hosted-datasets.gbif.org/datasets/backbone/current/backbone.zip
 tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level3.geojson
 ih_url="http://sweetgum.nybg.org/science/api/v1/institutions/search?dateModified=%3E01/01/2000&download=yes"
@@ -18,17 +17,19 @@ password=YOUR_GBIF_PASSWORD
 #limit_args= --limit=100000
 #limit_args=
 
-# Download WCVP taxonomy
-downloads/wcvp.txt:
+downloads/wcvp.zip:
 	mkdir -p downloads
-	wget --quiet -O $@ $(wcvp_name_url)
-getwcvp: downloads/wcvp.txt
+	wget -O $@ $(wcvp_zip_url)
+
+# Download WCVP taxonomy
+downloads/wcvp_names.txt: downloads/wcvp.zip
+	unzip -p $^  wcvp_names.txt >$@
+getwcvp: downloads/wcvp_names.txt
 
 # Download WCVP distributions
-downloads/wcvp_dist.txt:
-	mkdir -p downloads
-	wget --quiet -O $@ $(wcvp_dist_url)
-getwcvpdist: downloads/wcvp_dist.txt
+downloads/wcvp_distribution.txt: downloads/wcvp.zip
+	unzip -p $^  wcvp_distribution.txt >$@
+getwcvpdist: downloads/wcvp_distribution.txt
 
 # Download GBIF taxonomy
 downloads/gbif-taxonomy.zip:
@@ -51,7 +52,7 @@ downloads/cities15000.zip:
 	mkdir -p downloads	
 	wget --quiet -O $@ $(geonames_capital_cities_url)
 
-dl: downloads/wcvp.txt downloads/wcvp_dist.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
+dl: downloads/wcvp_names.txt downloads/wcvp_distribution.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
 
 # Extract taxon file from GBIF backbone taxonomy
 data/Taxon.tsv: downloads/gbif-taxonomy.zip
@@ -67,7 +68,7 @@ data/Taxon-Tracheophyta.tsv: filtergbif.py data/Taxon.tsv
 filter: data/Taxon-Tracheophyta.tsv
 
 # Process GBIF and WCVP taxonomies
-data/gbif2wcvp.csv: gbif2wcvp.py data/Taxon-Tracheophyta.tsv downloads/wcvp.txt
+data/gbif2wcvp.csv: gbif2wcvp.py data/Taxon-Tracheophyta.tsv downloads/wcvp_names.txt
 	mkdir -p data
 	$(python_launch_cmd) $^ $(limit_args) $@
 
@@ -106,7 +107,7 @@ data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml: taxa2gbi
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml
 
 ###############################################################################
@@ -119,7 +120,7 @@ data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.yaml: 
 	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml
 
 ###############################################################################
@@ -132,7 +133,7 @@ data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.
 	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml
 
 
