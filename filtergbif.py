@@ -23,7 +23,7 @@ def main():
     # 2. Incrementally read file, applying filter
     ###########################################################################
     print('Reading from: {}, filtering on: {}'.format(args.inputfile,query_filter))
-    gen = pd.read_csv(args.inputfile, sep=args.delimiter, chunksize=args.batchsize,nrows=args.limit)
+    gen = pd.read_csv(args.inputfile, sep=args.delimiter, chunksize=args.batchsize, nrows=args.limit, on_bad_lines='skip')
     df = pd.concat([x.query(query_filter) for x in gen])
     print('Read {} GBIF lines'.format(len(df)))
 
