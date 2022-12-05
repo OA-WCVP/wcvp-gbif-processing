@@ -4,6 +4,7 @@ import argparse
 from unidecode import unidecode
 import re
 from pygbif import registry
+import yaml
 
 def main():
     parser = argparse.ArgumentParser()
@@ -14,7 +15,7 @@ def main():
     parser.add_argument('--delimiter_occ', type=str, default='\t')
     parser.add_argument('--year_min', type=int, default=None)
     parser.add_argument("outputfile_data", type=str)
-    parser.add_argument("outputfile_md", type=str)
+    parser.add_argument("outputfile_yaml", type=str)
     args = parser.parse_args()
 
     ###########################################################################
@@ -62,11 +63,15 @@ def main():
     mask = (df.typeStatus.notnull())
     type_status_available_count = df[mask].accepted_id.nunique()
     total_taxa_count = df.accepted_id.nunique()
-    with open(args.outputfile_md,mode='w') as f:
-        summary_message = '{:.2%} taxa have type material available ({} of {})'.format(type_status_available_count/total_taxa_count, type_status_available_count, total_taxa_count)
-        print('Writing {} to {}'.format(summary_message, args.outputfile_md))
-        f.write(summary_message)
-    
+    analysis_variables = dict()
+    analysis_variables['taxon_count'] = total_taxa_count
+    analysis_variables['taxa_with_types_available_count'] = type_status_available_count
+    analysis_variables['taxa_with_types_available_pc'] = round((type_status_available_count/total_taxa_count)*100)
+    output_variables = dict()
+    output_variables['taxa2gbiftypeavailability']=analysis_variables
+    with open(args.outputfile_yaml, 'w') as f:
+        yaml.dump(output_variables, f)
+
     ###########################################################################
     # 4. Output
     ###########################################################################

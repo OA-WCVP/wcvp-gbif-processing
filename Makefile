@@ -102,12 +102,12 @@ data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip download
 # All types
 
 # Analyse how many taxa have type material in GBIF
-data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
-	$(python_launch_cmd) $^ $(limit_args) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.md
+data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
+	$(python_launch_cmd) $^ $(limit_args) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
-	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.md
+data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml
 
 ###############################################################################
 # Post-CBD
@@ -115,12 +115,12 @@ data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.
 cbd_impl_year:=1992
 
 # Analyse how many taxa have type material in GBIF
-data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
-	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.md
+data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.yaml: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
+	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
-	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.md
+data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml
 
 ###############################################################################
 # Post-Nagoya
@@ -128,23 +128,23 @@ data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailabil
 nagoya_impl_year:=2014
 
 # Analyse how many taxa have type material in GBIF
-data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.md: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
-	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.md
+data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.yaml: taxa2gbiftypeavailability.py data/gbif2wcvp.csv data/gbif-types.zip
+	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.md: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
-	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.md
+data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_dist.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml
 
 
-all: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md data/taxa2gbiftypeavailability-cbd.md data/taxa2nativerangetypeavailability-cbd.md data/taxa2gbiftypeavailability-nagoya.md data/taxa2nativerangetypeavailability-nagoya.md
+all: data/taxa2gbiftypeavailability.yaml data/taxa2nativerangetypeavailability.yaml data/taxa2gbiftypeavailability-cbd.yaml data/taxa2nativerangetypeavailability-cbd.yaml data/taxa2gbiftypeavailability-nagoya.yaml data/taxa2nativerangetypeavailability-nagoya.yaml
 
 data_archive_zip:=$(shell basename $(CURDIR))-data.zip
 downloads_archive_zip:=$(shell basename $(CURDIR))-downloads.zip
 
-archive: data/taxa2gbiftypeavailability.md data/taxa2nativerangetypeavailability.md  data/taxa2gbiftypeavailability-cbd.md data/taxa2nativerangetypeavailability-cbd.md data/taxa2gbiftypeavailability-nagoya.md data/taxa2nativerangetypeavailability-nagoya.md
+archive: data/taxa2gbiftypeavailability.yaml data/taxa2nativerangetypeavailability.yaml  data/taxa2gbiftypeavailability-cbd.yaml data/taxa2nativerangetypeavailability-cbd.yaml data/taxa2gbiftypeavailability-nagoya.yaml data/taxa2nativerangetypeavailability-nagoya.yaml
 	mkdir -p archive	
 	echo "Archived on $(date_formatted)" >> data/archive-info.txt
-	zip archive/$(data_archive_zip) data/*.md -r
+	zip archive/$(data_archive_zip) data/*.yaml -r
 	echo "Archived on $(date_formatted)" >> downloads/archive-info.txt
 	zip archive/$(downloads_archive_zip) downloads/* -r
 	

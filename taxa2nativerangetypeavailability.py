@@ -5,6 +5,7 @@ from unidecode import unidecode
 import re
 from pygbif import registry
 import numpy as np
+import yaml
 
 def main():
     parser = argparse.ArgumentParser()
@@ -20,7 +21,7 @@ def main():
     parser.add_argument('--delimiter_publ', type=str, default='\t')
     parser.add_argument("inputfile_tdwg_wgsrpd_l3_json", type=str)
     parser.add_argument("outputfile_data", type=str)
-    parser.add_argument("outputfile_md", type=str)
+    parser.add_argument("outputfile_yaml", type=str)
     args = parser.parse_args()
 
     ###########################################################################
@@ -121,22 +122,29 @@ def main():
     wgsrpd_columns = {'continent_code_l1':'publishingOrg_continent_code_l1',
                         'region_code_l2':'publishingOrg_region_code_l2',
                         'area_code_l3':'publishingOrg_area_code_l3'}
+    analysis_variables = dict()
+    analysis_variables['taxon_count'] = accepted_id_count
     summary_message=""
     for (distribution_loc, publishing_org_loc) in wgsrpd_columns.items():
         mask=(df[distribution_loc] == df[publishing_org_loc])
         accepted_id_served_from_within_native_range_count = df[mask].accepted_id.nunique()
         accepted_id_count = df.accepted_id.nunique()
         summary_message += ('- {:.2%} taxa ({} of {}) are represented by type material served from within their native range in {}\n'.format(accepted_id_served_from_within_native_range_count/accepted_id_count, accepted_id_served_from_within_native_range_count, accepted_id_count, distribution_loc))
-    print(summary_message)
+        current_level_variables = dict()
+        current_level_variables['taxon_represented_total']=accepted_id_served_from_within_native_range_count
+        current_level_variables['taxon_represented_pc']=round((accepted_id_served_from_within_native_range_count/accepted_id_count)*100)
+        analysis_variables[distribution_loc] = current_level_variables
+    
+    output_variables = dict()
+    output_variables['taxa2nativerangetypeavailability'] = analysis_variables
 
     # ###########################################################################
     # # 4. Output
     # ###########################################################################
     #
-    # 4.1 markdown format statement
-    with open(args.outputfile_md, 'w') as f:
-        print(summary_message)
-        f.write(summary_message)
+    # 4.1 YAML format data variables
+    with open(args.outputfile_yaml, 'w') as f:
+        yaml.dump(output_variables, f)
         
     # 4.2 Data
     # TBC
