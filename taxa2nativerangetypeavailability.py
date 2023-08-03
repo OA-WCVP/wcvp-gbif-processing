@@ -93,6 +93,8 @@ def main():
     # 2.5 Determine intersection between the GADM representative point and the TDWG L3 polygon
     df_intersect.crs = df_tdwg_poly.crs
     df_intersect.geometry = df_intersect.geometry_gadm_l1_repr_point
+    # Rename index_left and index_right (legacy from previous spatial join)
+    df_intersect.rename(columns={'index_left':'index_left_legacy','index_right':'index_right_legacy'}, inplace=True)
     df_intersect = df_intersect.sjoin(df_tdwg_poly, how="left")
 
     ###########################################################################
