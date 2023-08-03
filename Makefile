@@ -132,7 +132,7 @@ data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.yaml: 
 	$(python_launch_cmd) $^ $(limit_args) --year_min=$(cbd_impl_year)  data/taxa2gbiftypeavailability-cbd.csv data/taxa2gbiftypeavailability-cbd.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/gadm_410-levels.gpkg downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(cbd_impl_year) data/taxa2nativerangetypeavailability-cbd.csv data/taxa2nativerangetypeavailability-cbd.yaml
 
 ###############################################################################
@@ -145,7 +145,7 @@ data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.
 	$(python_launch_cmd) $^ $(limit_args)  --year_min=$(nagoya_impl_year) data/taxa2gbiftypeavailability-nagoya.csv data/taxa2gbiftypeavailability-nagoya.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/gadm_410-levels.gpkg downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args) --year_min=$(nagoya_impl_year) data/taxa2nativerangetypeavailability-nagoya.csv data/taxa2nativerangetypeavailability-nagoya.yaml
 
 
