@@ -16,10 +16,11 @@ password=YOUR_GBIF_PASSWORD
 # It will reduce the number of records processed, to ensure a quick sanity check of the process
 #limit_args= --limit=100000
 #limit_args=
+wget_args=--quiet
 
 downloads/wcvp.zip:
 	mkdir -p downloads
-	wget -O $@ $(wcvp_zip_url)
+	wget $(wget_args) -O $@ $(wcvp_zip_url)
 
 # Download WCVP taxonomy
 downloads/wcvp_names.txt: downloads/wcvp.zip
@@ -34,23 +35,23 @@ getwcvpdist: downloads/wcvp_distribution.txt
 # Download GBIF taxonomy
 downloads/gbif-taxonomy.zip:
 	mkdir -p downloads
-	wget --quiet -O $@ $(gbif_taxonomy_url)
+	wget $(wget_args) -O $@ $(gbif_taxonomy_url)
 getgbif: downloads/gbif-taxonomy.zip
 
 # Download TDWG WGSRPD L3 as geojson
 downloads/tdwg_wgsrpd_l3.json:
 	mkdir -p downloads
-	wget --quiet -O $@ $(tdwg_wgsrpd_l3_url)
+	wget $(wget_args) -O $@ $(tdwg_wgsrpd_l3_url)
 
 # Download IH datafile
 downloads/ih.txt:
 	mkdir -p downloads
-	wget --quiet -O $@ $(ih_url)
+	wget $(wget_args) -O $@ $(ih_url)
 
 # Download geonames capital cities
 downloads/cities15000.zip:
 	mkdir -p downloads	
-	wget --quiet -O $@ $(geonames_capital_cities_url)
+	wget $(wget_args) -O $@ $(geonames_capital_cities_url)
 
 dl: downloads/wcvp_names.txt downloads/wcvp_distribution.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
 
@@ -86,13 +87,13 @@ getdownloadstatus: data/gbif-type-download.id
 # 	# Will jq throw an error if downloadLink is not found?
 # 	$(eval download_link:=$(shell curl -Ss https://api.gbif.org/v1/occurrence/download/$(download_id) | jq '.downloadLink'))
 # 	# wget it
-# 	wget -O $@ $(download_link)
+# 	wget $(wget_args) -O $@ $(download_link)
 
 gbif_download_url=https://api.gbif.org/v1/occurrence/download/request/0429412-210914110416597.zip
 
 data/gbif-types.zip: 
 	# wget it
-	wget --quiet -O $@ $(gbif_download_url)
+	wget $(wget_args) -O $@ $(gbif_download_url)
 
 # Process GBIF type data to add details of publishing organisation
 data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt downloads/cities15000.zip
