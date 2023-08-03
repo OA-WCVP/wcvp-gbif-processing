@@ -19,6 +19,7 @@ def main():
     parser.add_argument('--delimiter_occ', type=str, default='\t')
     parser.add_argument("inputfile_publ", type=str)
     parser.add_argument('--delimiter_publ', type=str, default='\t')
+    parser.add_argument('gadm_geopackage_file', type=str, help='Path to GADM geopackage file')    
     parser.add_argument("inputfile_tdwg_wgsrpd_l3_json", type=str)
     parser.add_argument("outputfile_data", type=str)
     parser.add_argument("outputfile_yaml", type=str)
@@ -68,16 +69,31 @@ def main():
     import geopandas as gpd
     #
     # 2.1 Convert publishing organization locations to points ==================
-    df_point = gpd.GeoDataFrame(df_publ[['publishingOrgKey','latitude','longitude']].drop_duplicates(), geometry=gpd.points_from_xy(df_publ['longitude'], df_publ['latitude']))
-    print('Number of points requiring assignment to TDWG regions:', len(df_point))
+    # Make a geodataframe "df_gbif_point" where the geometry is a point built form the lat/long values
+    df_gbif_point = gpd.GeoDataFrame(df_publ[['publishingOrgKey','latitude','longitude']].drop_duplicates(), geometry=gpd.points_from_xy(df_publ['longitude'], df_publ['latitude']))
+    print('Number of points requiring assignment to TDWG regions:', len(df_gbif_point))
           
-    ## 2.2 Read TDWG WGSRPD L3 geojson format shape file ========================
-    df_poly = gpd.read_file(args.inputfile_tdwg_wgsrpd_l3_json)
-    print('Read {} TDWG WGSRPD l3 shapes from {}'.format(len(df_poly), args.inputfile_tdwg_wgsrpd_l3_json))
+    # 2.2 Read GADM level 1 geojson format shape file ========================
+    df_gadm_l1 = gpd.read_file(args.gadm_geopackage_file,layer="ADM_1")
+    df_gadm_l1['geometry_gadm_l1'] = df_gadm_l1.geometry
+    # Save the representative point of each GADM unit
+    df_gadm_l1['geometry_gadm_l1_repr_point'] = df_gadm_l1.geometry.representative_point()
+    print('df_gadm_l1','*'*60)   
+    print(df_gadm_l1.sample(n=1).T)
+
+    # 2.3 Determine intersection between GBIF publisher location and GADM L1 unit
+    # The join will be made on the geometry columns ie point in polygon
+    df_gbif_point.crs = df_gadm_l1.crs
+    df_intersect = df_gbif_point.sjoin(df_gadm_l1, how="left")
+
+    # 2.4 Read TDWG WGSRPD L3 geojson format shape file ========================
+    df_tdwg_poly = gpd.read_file(args.inputfile_tdwg_wgsrpd_l3_json)
+    print('Read {} TDWG WGSRPD l3 shapes from {}'.format(len(df_tdwg_poly), args.inputfile_tdwg_wgsrpd_l3_json))
     #
-    # 2.3 Determine intersection ===============================================
-    df_point.crs = df_poly.crs
-    df_intersect = df_point.sjoin(df_poly, how="left")
+    # 2.5 Determine intersection between the GADM representative point and the TDWG L3 polygon
+    df_intersect.crs = df_tdwg_poly.crs
+    df_intersect.geometry = df_intersect.geometry_gadm_l1_repr_point
+    df_intersect = df_intersect.sjoin(df_tdwg_poly, how="left")
 
     ###########################################################################
     # 3. Integrate taxonomy (df_tax), occurrences (df_occ) and TDWG WGSRPD L3 

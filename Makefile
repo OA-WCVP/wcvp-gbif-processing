@@ -3,6 +3,7 @@ gbif_taxonomy_url=https://hosted-datasets.gbif.org/datasets/backbone/current/bac
 tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level3.geojson
 ih_url="http://sweetgum.nybg.org/science/api/v1/institutions/search?dateModified=%3E01/01/2000&download=yes"
 geonames_capital_cities_url=http://download.geonames.org/export/dump/cities15000.zip
+gadm_gpkg_url=https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip
 
 python_launch_cmd=winpty python
 python_launch_cmd=python
@@ -53,7 +54,17 @@ downloads/cities15000.zip:
 	mkdir -p downloads	
 	wget $(wget_args) -O $@ $(geonames_capital_cities_url)
 
-dl: downloads/wcvp_names.txt downloads/wcvp_distribution.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json
+# Download GADM file
+downloads/gadm_410-gpkg.zip:
+	mkdir -p downloads
+	wget -O $@ $(gadm_gpkg_url)
+
+downloads/gadm_410-levels.gpkg: downloads/gadm_410-gpkg.zip
+	mkdir -p downloads
+	unzip $^ -d downloads
+	touch $@
+    
+dl: downloads/wcvp_names.txt downloads/wcvp_distribution.txt downloads/gbif-taxonomy.zip downloads/tdwg_wgsrpd_l3.json downloads/gadm_410-levels.gpkg
 
 # Extract taxon file from GBIF backbone taxonomy
 data/Taxon.tsv: downloads/gbif-taxonomy.zip
@@ -108,7 +119,7 @@ data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml: taxa2gbi
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml
 
 # Analyse how many taxa have type material published from within native range
-data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/tdwg_wgsrpd_l3.json
+data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/gadm_410-levels.gpkg downloads/tdwg_wgsrpd_l3.json
 	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml
 
 ###############################################################################
