@@ -69,7 +69,8 @@ def main():
     #
     # 2.1 Convert publishing organization locations to points ==================
     df_point = gpd.GeoDataFrame(df_publ[['publishingOrgKey','latitude','longitude']].drop_duplicates(), geometry=gpd.points_from_xy(df_publ['longitude'], df_publ['latitude']))
-    
+    print('Number of points requiring assignment to TDWG regions:', len(df_point)
+          
     ## 2.2 Read TDWG WGSRPD L3 geojson format shape file ========================
     df_poly = gpd.read_file(args.inputfile_tdwg_wgsrpd_l3_json)
     print('Read {} TDWG WGSRPD l3 shapes from {}'.format(len(df_poly), args.inputfile_tdwg_wgsrpd_l3_json))
