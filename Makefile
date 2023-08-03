@@ -57,7 +57,7 @@ downloads/cities15000.zip:
 # Download GADM file
 downloads/gadm_410-gpkg.zip:
 	mkdir -p downloads
-	wget -O $@ $(gadm_gpkg_url)
+	wget $(wget_args) -O $@ $(gadm_gpkg_url)
 
 downloads/gadm_410-levels.gpkg: downloads/gadm_410-gpkg.zip
 	mkdir -p downloads
