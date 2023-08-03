@@ -53,11 +53,11 @@ def main():
     print('Read {} GBIF lines from: {}'.format(len(df), args.inputfile_gbif))
 
     # 1.2 Read IH data file ===========================================================
-    df_ih = pd.read_csv(args.inputfile_ih, sep=args.delimiter_ih, nrows=args.limit,error_bad_lines=False)
+    df_ih = pd.read_csv(args.inputfile_ih, sep=args.delimiter_ih, nrows=args.limit,on_bad_lines='warn')
     print('Read {} IH lines from: {}'.format(len(df_ih), args.inputfile_ih))
 
     # 1.3 Read geonames data file ===========================================================
-    df_gn = pd.read_csv(args.inputfile_geonames, sep=args.delimiter_geonames, nrows=args.limit,error_bad_lines=False, names=GEONAMES_COLUMNS)
+    df_gn = pd.read_csv(args.inputfile_geonames, sep=args.delimiter_geonames, nrows=args.limit,on_bad_lines='warn', names=GEONAMES_COLUMNS)
     print('Read {} geonames lines from: {}'.format(len(df_gn), args.inputfile_geonames))
     df_gn.drop(df_gn[df_gn['feature code']!='PPLC'].index,inplace=True)
     print('Retained {} geonames capital city lines'.format(len(df_gn)))
