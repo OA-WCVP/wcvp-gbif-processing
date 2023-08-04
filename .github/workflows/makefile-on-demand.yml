@@ -1,0 +1,28 @@
+name: Makefile CI on demand
+
+on:
+  workflow_dispatch:      
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Create download dir
+      run: mkdir -p downloads
+
+    - name: Install python dependencies
+      run: pip install -r requirements.txt
+      
+    - name: Build reports and archive into a zip
+      run: make archive
+      
+    - name: Attach built artifacts to run 
+      uses: actions/upload-artifact@v3
+      with:
+        name: data
+        path: data
+          
