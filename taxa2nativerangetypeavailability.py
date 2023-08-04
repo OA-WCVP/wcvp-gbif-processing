@@ -183,6 +183,9 @@ def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geo
     df['geometry_safe'] = df['geometry']
 
     for i, row in df.iterrows():
+        
+        print(row)
+        
         # Create a figure
         fig, ax = plt.subplots(figsize=(8,10))
 
@@ -218,7 +221,7 @@ def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geo
         except:
             print('Unable to plot {} for index {}'.format(final_poly_geometry_column_name, i))
 
-        title = '{org_title} ({country})'.format(row['title_gbif'], row['country_gbif'])
+        title = '{org_title} ({country})'.format(org_title = row['title_gbif'], country = row['country_gbif'])
         plt.title(title)
 
         # Save the plot
