@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--delimiter_publ', type=str, default='\t')
     parser.add_argument('gadm_geopackage_file', type=str, help='Path to GADM geopackage file')    
     parser.add_argument("inputfile_tdwg_wgsrpd_l3_json", type=str)
-    parser.add_argument("--output_spatial_debug_info", type=bool, default=False, action='store_true')
+    parser.add_argument("--output_spatial_debug_info", default=False, action='store_true')
     parser.add_argument('--output_spatial_debug_dir', type=str, default='data/')
     parser.add_argument("outputfile_data", type=str)
     parser.add_argument("outputfile_yaml", type=str)
