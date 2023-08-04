@@ -7,9 +7,8 @@ gadm_gpkg_url=https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip
 gbif_publ_id_rutgers=eb126411-e092-4abc-a0b9-a2e1c98c6578
 gbif_publ_id_universidade_federal_de_juiz_de_fora=303e2432-448c-41ec-be2b-020a25c7adc4
 gbif_publ_id_instituto_do_meio_ambiente_do_estado_de_alagoas=81114709-2a6c-4e0b-908b-cb207a8708c2
-gbif_publ_ids_with_bad_coordinates=
-python_launch_cmd=winpty python
-python_launch_cmd=python
+gbif_publ_ids_with_bad_coordinates=$(gbif_publ_id_rutgers),$(gbif_publ_id_universidade_federal_de_juiz_de_fora),$(gbif_publ_id_instituto_do_meio_ambiente_do_estado_de_alagoas)
+
 
 date_formatted=$(shell date +%Y%m%d-%H%M%S)
 
@@ -111,7 +110,8 @@ data/gbif-types.zip:
 
 # Process GBIF type data to add details of publishing organisation
 data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt downloads/cities15000.zip
-	$(python_launch_cmd) $^ $(limit_args) $@
+	$(python_launch_cmd) $^ $(limit_args) --ignore_gbif_publ_coordinates $(gbif_publ_ids_with_bad_coordinates)
+ $@
 
 
 ###############################################################################
