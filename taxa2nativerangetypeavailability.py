@@ -182,8 +182,8 @@ import matplotlib.pyplot as plt
 def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geometry_original_point', first_poly_geometry_column_name='geometry_gadm_l1', repr_point_geometry_column_name='geometry_gadm_l1_repr_point', final_poly_geometry_column_name='geometry_tdwg_l3'):
     df['geometry_safe'] = df['geometry']
     for i, row in df.iterrows():
-        # Create a figure with two subplots
-        fig, ax = plt.plot(figsize=(8,10))
+        # Create a figure
+        fig, ax = plt.subplots(figsize=(8,10))
 
         # Plot original point
         df.iloc[i]['geometry'] = df.iloc[i][orig_point_geometry_column_name]
