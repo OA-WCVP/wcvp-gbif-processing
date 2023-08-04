@@ -9,6 +9,8 @@ gbif_publ_id_universidade_federal_de_juiz_de_fora=303e2432-448c-41ec-be2b-020a25
 gbif_publ_id_instituto_do_meio_ambiente_do_estado_de_alagoas=81114709-2a6c-4e0b-908b-cb207a8708c2
 gbif_publ_ids_with_bad_coordinates=$(gbif_publ_id_rutgers),$(gbif_publ_id_universidade_federal_de_juiz_de_fora),$(gbif_publ_id_instituto_do_meio_ambiente_do_estado_de_alagoas)
 
+python_launch_cmd=winpty python
+python_launch_cmd=python
 
 date_formatted=$(shell date +%Y%m%d-%H%M%S)
 
