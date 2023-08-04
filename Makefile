@@ -120,7 +120,7 @@ data/taxa2gbiftypeavailability.csv data/taxa2gbiftypeavailability.yaml: taxa2gbi
 
 # Analyse how many taxa have type material published from within native range
 data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml: taxa2nativerangetypeavailability.py data/gbif2wcvp.csv downloads/wcvp_distribution.txt data/gbif-types.zip data/gbif-typesloc.zip downloads/gadm_410-levels.gpkg downloads/tdwg_wgsrpd_l3.json
-	$(python_launch_cmd) $^ $(limit_args) data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml
+	$(python_launch_cmd) $^ $(limit_args) --output_spatial_debug_info data/taxa2nativerangetypeavailability.csv data/taxa2nativerangetypeavailability.yaml
 
 ###############################################################################
 # Post-CBD
