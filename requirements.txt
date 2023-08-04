@@ -1,5 +1,5 @@
 geopandas
-matplotlib==3.2
+matplotlib
 pandas
 pygbif
 rtree
