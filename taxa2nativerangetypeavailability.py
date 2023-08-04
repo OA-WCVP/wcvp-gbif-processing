@@ -1,11 +1,13 @@
 import pandas as pd
 pd.set_option('display.max_rows',100)
+import geopandas as gpd
 import argparse
 from unidecode import unidecode
 import re
 from pygbif import registry
 import numpy as np
 import yaml
+import matplotlib.pyplot as plt
 
 def main():
     parser = argparse.ArgumentParser()
@@ -68,7 +70,7 @@ def main():
     ###########################################################################    
     # 2 Determine TDWG WGSRPD L3 region from lat/long =========================
     ###########################################################################    
-    import geopandas as gpd
+
     #
     # 2.1 Convert publishing organization locations to points ==================
     # Make a geodataframe "df_gbif_point" where the geometry is a point built form the lat/long values
@@ -178,7 +180,6 @@ def main():
     # print('Outputting {} rows to {}'.format(len(df), args.outputfile_data))
     # df.to_csv(args.outputfile_data,sep='\t',index=False)
 
-import matplotlib.pyplot as plt
 def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geometry_original_point', first_poly_geometry_column_name='geometry_gadm_l1', repr_point_geometry_column_name='geometry_gadm_l1_repr_point', final_poly_geometry_column_name='geometry_tdwg_l3'):
     df['geometry_safe'] = df['geometry']
 
@@ -190,34 +191,30 @@ def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geo
         fig, ax = plt.subplots(figsize=(8,10))
 
         # Plot original point
-        df['geometry'] = df[orig_point_geometry_column_name]
-        df_temp = pd.DataFrame(df.iloc[i])
+        row['geometry'] = row[orig_point_geometry_column_name]
         try:
-            df_temp.plot(ax=ax, marker='x', color='red', markersize=5)
+            gpd.DataFrame(row).plot(ax=ax, marker='x', color='red', markersize=5)
         except:
             print('Unable to plot {} for index {}'.format(orig_point_geometry_column_name, i))
 
         # Plot GADM poly
-        df['geometry'] = df[first_poly_geometry_column_name]
-        df_temp = pd.DataFrame(df.iloc[i])
+        row['geometry'] = row[first_poly_geometry_column_name]
         try:
-            df_temp.plot(ax=ax,color='red',alpha=0.1)
+            gpd.DataFrame(row).plot(ax=ax,color='red',alpha=0.1)
         except:
             print('Unable to plot {} for index {}'.format(first_poly_geometry_column_name, i))
 
         # Plot representative point
-        df['geometry'] = df[repr_point_geometry_column_name]
-        df_temp = pd.DataFrame(df.iloc[i])
+        row['geometry'] = row[repr_point_geometry_column_name]
         try:
-            df_temp.plot(ax=ax, marker='x', color='blue', markersize=5)
+            gpd.DataFrame(row).plot(ax=ax, marker='x', color='blue', markersize=5)
         except:
             print('Unable to plot {} for index {}'.format(repr_point_geometry_column_name, i))
 
         # Plot TDWG poly
-        df['geometry'] = df[final_poly_geometry_column_name]
-        df_temp = pd.DataFrame(df.iloc[i])
+        row['geometry'] = row[final_poly_geometry_column_name]
         try:
-            df_temp.plot(ax=ax,color='green',alpha=0.1)
+            gpd.DataFrame(row).plot(ax=ax,color='green',alpha=0.1)
         except:
             print('Unable to plot {} for index {}'.format(final_poly_geometry_column_name, i))
 
