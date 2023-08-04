@@ -4,7 +4,10 @@ tdwg_wgsrpd_l3_url=https://github.com/jiacona/tdwg-geojson/raw/master/tdwg-level
 ih_url="http://sweetgum.nybg.org/science/api/v1/institutions/search?dateModified=%3E01/01/2000&download=yes"
 geonames_capital_cities_url=http://download.geonames.org/export/dump/cities15000.zip
 gadm_gpkg_url=https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip
-
+gbif_publ_id_rutgers=eb126411-e092-4abc-a0b9-a2e1c98c6578
+gbif_publ_id_universidade_federal_de_juiz_de_fora=303e2432-448c-41ec-be2b-020a25c7adc4
+gbif_publ_id_instituto_do_meio_ambiente_do_estado_de_alagoas=81114709-2a6c-4e0b-908b-cb207a8708c2
+gbif_publ_ids_with_bad_coordinates=
 python_launch_cmd=winpty python
 python_launch_cmd=python
 

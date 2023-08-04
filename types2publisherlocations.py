@@ -40,7 +40,7 @@ def main():
     parser.add_argument('--delimiter_ih', type=str, default=',')
     parser.add_argument("inputfile_geonames", type=str)
     parser.add_argument('--delimiter_geonames', type=str, default='\t')
-
+    parser.add_argument('--ignore_gbif_publ_coordinates', type=str, default=None)
     parser.add_argument("outputfile", type=str)
     args = parser.parse_args()
 
@@ -76,6 +76,12 @@ def main():
                 ,right_on='key'
                 ,how='left'
                 ,suffixes=['','_org'])
+
+    # Disregard GBIF coordinates for those known to be erroneous
+    if args.ignore_gbif_publ_coordinates is not None:
+        publs_ids = args.ignore_gbif_publ_coordinates.split(',')
+        df.loc[df.publishingOrgKey.isin(publs_ids),'latitude'] = None
+        df.loc[df.publishingOrgKey.isin(publs_ids),'longitude'] = None
 
     ###########################################################################
     # 3. Fill any gaps (those without lat/long in the GBIF registry) 
