@@ -191,30 +191,26 @@ def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geo
         fig, ax = plt.subplots(figsize=(8,10))
 
         # Plot original point
-        row['geometry'] = row[orig_point_geometry_column_name]
         try:
-            gpd.DataFrame([row]).plot(ax=ax, marker='x', color='red', markersize=5)
+            df[df.index==i].set_geometry(orig_point_geometry_column_name).plot(ax=ax, marker='x', color='red', markersize=5)
         except:
             print('Unable to plot {} for index {}'.format(orig_point_geometry_column_name, i))
 
         # Plot GADM poly
-        row['geometry'] = row[first_poly_geometry_column_name]
         try:
-            gpd.DataFrame([row]).plot(ax=ax,color='red',alpha=0.1)
+            df[df.index==i].set_geometry(first_poly_geometry_column_name).plot(ax=ax,color='red',alpha=0.1)
         except:
             print('Unable to plot {} for index {}'.format(first_poly_geometry_column_name, i))
 
         # Plot representative point
-        row['geometry'] = row[repr_point_geometry_column_name]
         try:
-            gpd.DataFrame([row]).plot(ax=ax, marker='x', color='blue', markersize=5)
+            df[df.index==i].set_geometry(repr_point_geometry_column_name).plot(ax=ax, marker='x', color='blue', markersize=5)
         except:
             print('Unable to plot {} for index {}'.format(repr_point_geometry_column_name, i))
 
         # Plot TDWG poly
-        row['geometry'] = row[final_poly_geometry_column_name]
         try:
-            gpd.DataFrame([row]).plot(ax=ax,color='green',alpha=0.1)
+            df[df.index==i].set_geometry(final_poly_geometry_column_name).plot(ax=ax,color='green',alpha=0.1)
         except:
             print('Unable to plot {} for index {}'.format(final_poly_geometry_column_name, i))
 
@@ -224,9 +220,6 @@ def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geo
         # Save the plot
         figname = '{outputdir}/{id}.png'.format(outputdir = outputdir, id = i)
         plt.savefig(figname)
-
-    df['geometry'] = df['geometry_safe']
-    df.drop_columns(['geometry_safe'], axis=1)
 
 if __name__ == '__main__':
     main()
