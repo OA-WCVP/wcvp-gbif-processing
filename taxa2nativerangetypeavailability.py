@@ -193,28 +193,28 @@ def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geo
         # Plot original point
         row['geometry'] = row[orig_point_geometry_column_name]
         try:
-            gpd.DataFrame(row).plot(ax=ax, marker='x', color='red', markersize=5)
+            gpd.DataFrame([row]).plot(ax=ax, marker='x', color='red', markersize=5)
         except:
             print('Unable to plot {} for index {}'.format(orig_point_geometry_column_name, i))
 
         # Plot GADM poly
         row['geometry'] = row[first_poly_geometry_column_name]
         try:
-            gpd.DataFrame(row).plot(ax=ax,color='red',alpha=0.1)
+            gpd.DataFrame([row]).plot(ax=ax,color='red',alpha=0.1)
         except:
             print('Unable to plot {} for index {}'.format(first_poly_geometry_column_name, i))
 
         # Plot representative point
         row['geometry'] = row[repr_point_geometry_column_name]
         try:
-            gpd.DataFrame(row).plot(ax=ax, marker='x', color='blue', markersize=5)
+            gpd.DataFrame([row]).plot(ax=ax, marker='x', color='blue', markersize=5)
         except:
             print('Unable to plot {} for index {}'.format(repr_point_geometry_column_name, i))
 
         # Plot TDWG poly
         row['geometry'] = row[final_poly_geometry_column_name]
         try:
-            gpd.DataFrame(row).plot(ax=ax,color='green',alpha=0.1)
+            gpd.DataFrame([row]).plot(ax=ax,color='green',alpha=0.1)
         except:
             print('Unable to plot {} for index {}'.format(final_poly_geometry_column_name, i))
 
