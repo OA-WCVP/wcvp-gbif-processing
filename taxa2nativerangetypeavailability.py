@@ -181,25 +181,42 @@ def main():
 import matplotlib.pyplot as plt
 def generateSpatialDebugInfo(df, outputdir, orig_point_geometry_column_name='geometry_original_point', first_poly_geometry_column_name='geometry_gadm_l1', repr_point_geometry_column_name='geometry_gadm_l1_repr_point', final_poly_geometry_column_name='geometry_tdwg_l3'):
     df['geometry_safe'] = df['geometry']
+
     for i, row in df.iterrows():
         # Create a figure
         fig, ax = plt.subplots(figsize=(8,10))
 
         # Plot original point
-        df.iloc[i]['geometry'] = df.iloc[i][orig_point_geometry_column_name]
-        df.iloc[i].plot(ax=ax, marker='x', color='red', markersize=5)
+        df['geometry'] = df[orig_point_geometry_column_name]
+        df_temp = pd.DataFrame(df.iloc[i])
+        try:
+            df_temp.plot(ax=ax, marker='x', color='red', markersize=5)
+        except:
+            print('Unable to plot {} for index {}'.format(orig_point_geometry_column_name, i))
 
         # Plot GADM poly
-        df.iloc[i]['geometry'] = df.iloc[i][first_poly_geometry_column_name]
-        df.iloc[i].plot(ax=ax,color='red',alpha=0.1)
-        
+        df['geometry'] = df[first_poly_geometry_column_name]
+        df_temp = pd.DataFrame(df.iloc[i])
+        try:
+            df_temp.plot(ax=ax,color='red',alpha=0.1)
+        except:
+            print('Unable to plot {} for index {}'.format(first_poly_geometry_column_name, i))
+
         # Plot representative point
-        df.iloc[i]['geometry'] = df.iloc[i][repr_point_geometry_column_name]
-        df.iloc[i].plot(ax=ax, marker='x', color='blue', markersize=5)
+        df['geometry'] = df[repr_point_geometry_column_name]
+        df_temp = pd.DataFrame(df.iloc[i])
+        try:
+            df_temp.plot(ax=ax, marker='x', color='blue', markersize=5)
+        except:
+            print('Unable to plot {} for index {}'.format(repr_point_geometry_column_name, i))
 
         # Plot TDWG poly
-        df.iloc[i]['geometry'] = df.iloc[i][final_poly_geometry_column_name]
-        df.iloc[i].plot(ax=ax,color='green',alpha=0.1)
+        df['geometry'] = df[final_poly_geometry_column_name]
+        df_temp = pd.DataFrame(df.iloc[i])
+        try:
+            df_temp.plot(ax=ax,color='green',alpha=0.1)
+        except:
+            print('Unable to plot {} for index {}'.format(final_poly_geometry_column_name, i))
 
         title = '{org_title} ({country})'.format(row['title_gbif'], row['country_gbif'])
         plt.title(title)
