@@ -112,8 +112,7 @@ data/gbif-types.zip:
 
 # Process GBIF type data to add details of publishing organisation
 data/gbif-typesloc.zip: types2publisherlocations.py data/gbif-types.zip downloads/ih.txt downloads/cities15000.zip
-	$(python_launch_cmd) $^ $(limit_args) --ignore_gbif_publ_coordinates $(gbif_publ_ids_with_bad_coordinates)
- $@
+	$(python_launch_cmd) $^ $(limit_args) --ignore_gbif_publ_coordinates $(gbif_publ_ids_with_bad_coordinates) $@
 
 
 ###############################################################################
